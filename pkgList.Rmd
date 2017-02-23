@@ -3,4 +3,7 @@ title: "Considerations for R Package"
 output: html_document
 ---
 
-* Generalizations of functions (e.g. use of normal prior/likelihood, changing `ivt` to separate star, end, infusion rate vectors)
+* Generalizations of functions (e.g. use of normal prior/likelihood, changing `ivt` to separate star, end, infusion rate vectors)  
+* How to deal with units in our functions? The fact that time is in hours, conversion from g/L to micrograms/mL  
+* Make `mic_stat` function return point estimate and SE/CI  
+

@@ -1,8 +1,12 @@
 Package: pkpredict
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Compartment Model Implementation for Pharmacokinetic Analysis
+Version: 0.0.1
+Depends: mvtnorm, cubature, ellipse, shiny 
+Authors@R: c(person("Matthew", "Shotwell", email = "matt.shotwell@vanderbilt.edu", role = c("aut", "cre"),
+ person("Hannah", "Weeks", email = "hannah.weeks@vanderbilt.edu", role = c("aut"))
+Description: Contains functions to perform analyses associated with pharmacokinetic modeling. 
+ (Further explanation required) 
+URL: insertGithubURL
 Depends: R (>= 3.3.2)
 License: What license is it under?
 Encoding: UTF-8

@@ -8,7 +8,7 @@
 #' @param k_12 Elimination rate from central to peripheral compartment
 #' @param k_21 Elimination rate from peripheral to central compartment
 #' @param v_1 Volume of central compartment
-#' @param ivt List with 3 columns containing start of infusion times, end of infusion times,
+#' @param ivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose
 #' @param init Initial concentration of drug in each compartment
 #'

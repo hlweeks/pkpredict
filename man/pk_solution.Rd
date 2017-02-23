@@ -15,7 +15,7 @@ pk_solution(k_10, k_12, k_21, v_1, ivt, init = c(0, 0))
 
 \item{v_1}{Volume of central compartment}
 
-\item{ivt}{List with 3 columns containing start of infusion times, end of infusion times,
+\item{ivt}{List with containing start of infusion times, end of infusion times,
 and rate of infusion at each dose}
 
 \item{init}{Initial concentration of drug in each compartment}
