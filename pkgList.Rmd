@@ -1,0 +1,6 @@
+---
+title: "Considerations for R Package"
+output: html_document
+---
+
+* Generalizations of functions (e.g. use of normal prior/likelihood, changing `ivt` to separate star, end, infusion rate vectors)

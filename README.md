@@ -1,2 +1,0 @@
-# pkpredict
-R package
