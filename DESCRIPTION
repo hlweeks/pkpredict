@@ -2,7 +2,7 @@ Package: pkpredict
 Title: Compartment Model Implementation for Pharmacokinetic Analysis
 Version: 0.0.1
 Depends: mvtnorm, cubature, ellipse, shiny 
-Authors@R: c(person("Matthew", "Shotwell", email = "matt.shotwell@vanderbilt.edu", role = c("aut", "cre"),
+Authors@R: c(person("Matthew", "Shotwell", email = "matt.shotwell@vanderbilt.edu", role = c("aut"),
  person("Hannah", "Weeks", email = "hannah.weeks@vanderbilt.edu", role = c("aut"))
 Description: Contains functions to perform analyses associated with pharmacokinetic modeling. 
  (Further explanation required) 

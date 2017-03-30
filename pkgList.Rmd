@@ -3,7 +3,20 @@ title: "Considerations for R Package"
 output: html_document
 ---
 
-* Generalizations of functions (e.g. use of normal prior/likelihood, changing `ivt` to separate star, end, infusion rate vectors)  
-* How to deal with units in our functions? The fact that time is in hours, conversion from g/L to micrograms/mL  
-* Make `mic_stat` function return point estimate and SE/CI  
+* Make ivt helper function to convert vectors to list    
+* How to deal with units in our functions? The fact that time is in hours, conversion from g/L to micrograms/mL, `dat` in hours and micrograms/mL  
+* In `confint` method for mic stat - what SE to return? Using `fdGrad` on original scale? Or SE on logit scale (used for intervals)? Or just CIs?  
+* Is it ok to make a `confint` method even though these are credible bands?  
+* Rearrange prior/model function to depend on supplied mean/sd of distribution  
+* How to structure the hyperparameters? Would draws from the hyperpriors be made within the log_prior function?  
+* What exactly is the role of the optim object? For a new problem, are the only parameters that need to be changed at this point the ivt and dat objects? Are the lpr_mean_d values the "default" hyperparameters?
+
+
+```
+est <- optim(lpr_mean_d, log_posterior, ivt=ivt,
+             dat=dat, control = list(fnscale=-1), hessian=TRUE)
+```
+
+Aside  
+* What do the hyperpriors mean biologically?
 

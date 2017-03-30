@@ -1,20 +1,58 @@
 #' Time Above Pharmacokinetic Threshold
 #'
+#' Compute an estimate of pharmacodynamic target attainment, typically defined
+#' to be some multiple of the minimum inhibitory concentration of the infecting microorganism
+#'
 #' @param pk_pars Vector of pharmacokinetic parameters of length 4: (v_1, k_10, k_12, k_21)
-#' @param ivt List with containing start of infusion times, end of infusion times,
-#' and rate of infusion at each dose
+#' @param th Threshold value for effective treatment - check units
+#' @param ivt List with containing start of infusion times (h), end of infusion times (h),
+#' and rate of infusion (g/h) at each dose
 #' @param tms Times to use in function evaluation
+#' @param cod Length of time after end of last dose to consider
 #' @param con Concentration of drug at each of the specified times
-#' @param th Threshold value for effective treatment
+#' @param init Initial concentrations in c(central, peripheral) compartments
 #'
 #' @return Fraction of time spent above the specified threshold from time of first dose through
-#' 12 hours after end of the last dose
+#' \code{cod} hours after end of the last dose
 #'
 #' @export
 
-mic_stat <- function(pk_pars, ivt, tms, con, th){
-  #Values of the plotted posterior concentrations
-  conc <- con[1,]
+mic_stat <- function(pk_pars, th, ivt, times = NULL, cod = 12, con = NULL, init = c(0,0)){
+  if(!is.null(times) & !is.null(con)){
+    if(length(times) != length(con)) stop("times and con must be of the same length")
+  }
+
+  if(is.null(times)){
+    if(is.null(cod)){stop("cod must be specified when times = NULL")}
+
+    tms <- sapply(ivt, function(x) c(x$begin, x$end))
+    tms <- c(tms, max(tms)+cod)
+    tms <- unlist(sapply(1:(length(tms)-1), function(i) {
+      s1 <- seq(tms[i], tms[i+1], 1/10)
+      if(tms[i+1] %% 1/10)
+        s1 <- c(s1, tms[i+1])
+      return(s1)
+    }))
+  }else{tms <- times}
+  tms <- pmax(1e-3, tms)
+
+  if(is.null(con)){
+    ## Approximate standard deviation of log concentration-time curve
+    grd <- fdGrad(est$par, function(pars) {
+      sol <- pk_solution(v_1=exp(pars[1]), k_10=exp(pars[2]),
+                         k_12=exp(pars[3]), k_21=exp(pars[4]), ivt=ivt, init = init)
+      log(sol(tms)[1,]*1000) ## mulitply by 1000: g/l -> ug/ml
+    })
+    sde <- sqrt(diag(grd %*% solve(-est$hessian) %*% t(grd)))
+    sde <- ifelse(is.nan(sde), 0, sde)
+
+    ## Posterior estiamte
+    sol <- pk_solution(v_1=exp(est$par[1]), k_10=exp(est$par[2]),
+                       k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=ivt)
+    con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
+    #Values of the plotted posterior concentrations
+    conc <- con[1,]
+  }else{conc <- con}
 
   # Get PK solution equation evaluated at parameters
   soln <- pk_solution(v_1=exp(pk_pars[1]), k_10=exp(pk_pars[2]),
@@ -30,13 +68,13 @@ mic_stat <- function(pk_pars, ivt, tms, con, th){
   ibe <- sapply(ivt, `[[`, 'begin')
   ied <- sapply(ivt, `[[`, 'end')
 
-  # Initialize time spent above 4*mic
+  # Initialize time spent above threshold
   t_above <- 0
 
   # Time between start of dose and end of dose
   for(i in 1:length(ibe)){
     # Concentration values at interval endpoints, centered by threshold
-    cb <- ifelse(i > 1, conc[tms == ibe[i]] - th, 0-64)
+    cb <- ifelse(i > 1, conc[tms == ibe[i]] - th, 0 - th)
     ce <- unique(conc[tms == ied[i]] - th) #Printing two copies for some reason? Inserted unique to fix for now
     if(cb < 0 && ce > 0){
       # Crosses to above threshold during interval
@@ -64,8 +102,10 @@ mic_stat <- function(pk_pars, ivt, tms, con, th){
     }
   }
 
-  # Use time spent above 4*mic to compute proportion
-  frac_time <- t_above/max(tms)
+  # Use time spent above threshold to compute proportion
+  ftmic <- t_above/max(tms)
 
-  return(frac_time)
+  class(ftmic) <- c("mic", class(ftmic))
+
+  return(ftmic)
 }

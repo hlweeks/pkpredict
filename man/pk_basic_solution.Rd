@@ -15,19 +15,22 @@ pk_basic_solution(k_10, k_12, k_21, v_1, k_R, c_0 = c(0, 0))
 
 \item{v_1}{Volume of central compartment}
 
-\item{k_R}{Rate of infusion [g/h]}
+\item{k_R}{Rate of infusion (g/h)}
 
-\item{c_0}{Initial concentration of central compartment}
+\item{c_0}{Initial concentrations of c(central, peripheral) compartments}
 }
 \value{
-List containing concentration in central and peripheral compartments
+List containing concentration in central and peripheral compartments, respectively.
 }
 \description{
+Calculates the solution of a two-comparment model.
+}
+\details{
 The 'pk_basic_solution' function implements the
 two-compartment model solution for fixed parameters k_10,
 k_12, k_21, v_1, k_R, and c_0 (initial concentrations).
 This function is based on the solution to a nonhomogeneous
 linear system of ODEs. The basic solution could also be
 computed using numerical integration, which is commonly used
-for more complicated models:
+for more complicated models.
 }

@@ -15,14 +15,14 @@ pk_solution(k_10, k_12, k_21, v_1, ivt, init = c(0, 0))
 
 \item{v_1}{Volume of central compartment}
 
-\item{ivt}{List with containing start of infusion times, end of infusion times,
-and rate of infusion at each dose}
+\item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
+and rate of infusion (g/h) at each dose}
 
-\item{init}{Initial concentration of drug in each compartment}
+\item{init}{Initial concentration of drug in c(central, peripheral) compartments}
 }
 \value{
 A function that will compute concentration of drug in the body given time since
-first infusion
+first infusion.
 }
 \description{
 The 'pk_solution' function impelments a piecewise solution

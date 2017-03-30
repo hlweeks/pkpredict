@@ -8,22 +8,22 @@
 #' @param k_12 Elimination rate from central to peripheral compartment
 #' @param k_21 Elimination rate from peripheral to central compartment
 #' @param v_1 Volume of central compartment
-#' @param ivt List with containing start of infusion times, end of infusion times,
-#' and rate of infusion at each dose
-#' @param init Initial concentration of drug in each compartment
+#' @param ivt List with containing start of infusion times (h), end of infusion times (h),
+#' and rate of infusion (g/h) at each dose
+#' @param init Initial concentration of drug in c(central, peripheral) compartments
 #'
 #' @return A function that will compute concentration of drug in the body given time since
-#' first infusion
+#' first infusion.
 #'
 #' @export
 
-pk_solution <-
-  function(k_10, k_12, k_21, v_1, ivt, init=c(0,0)) {
+pk_solution <- function(k_10, k_12, k_21, v_1, ivt, init=c(0,0)) {
     ## create a list of event times
     ibe <- sapply(ivt, `[[`, 'begin')
     ied <- sapply(ivt, `[[`, 'end')
     prd <- sort(unique(c(0, c(ibe,ied), Inf)))
     rits <- list()
+
     ## compute basic solution in each interval
     for(i in 1:(length(prd)-1)) {
       civt <- sapply(ivt, function(iv) {

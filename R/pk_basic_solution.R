@@ -1,26 +1,30 @@
 #' Two-compartment model solution
 #'
+#' Calculates the solution of a two-comparment model.
+#'
+#' @param k_10 Elimination rate from central compartment
+#' @param k_12 Elimination rate from central to peripheral compartment
+#' @param k_21 Elimination rate from peripheral to central compartment
+#' @param v_1 Volume of central compartment
+#' @param k_R Rate of infusion (g/h)
+#' @param c_0 Initial concentrations of c(central, peripheral) compartments
+#'
+#' @details
 #' The 'pk_basic_solution' function implements the
 #' two-compartment model solution for fixed parameters k_10,
 #' k_12, k_21, v_1, k_R, and c_0 (initial concentrations).
 #' This function is based on the solution to a nonhomogeneous
 #' linear system of ODEs. The basic solution could also be
 #' computed using numerical integration, which is commonly used
-#' for more complicated models:
+#' for more complicated models.
 #'
-#' @param k_10 Elimination rate from central compartment
-#' @param k_12 Elimination rate from central to peripheral compartment
-#' @param k_21 Elimination rate from peripheral to central compartment
-#' @param v_1 Volume of central compartment
-#' @param k_R Rate of infusion [g/h]
-#' @param c_0 Initial concentration of central compartment
-#'
-#' @return List containing concentration in central and peripheral compartments
+#' @return List containing concentration in central and peripheral compartments, respectively.
 #'
 #' @export
 
 pk_basic_solution <-
   function(k_10, k_12, k_21, v_1, k_R, c_0=c(0,0)) {
+
     K <- matrix(c(-(k_10+k_12), k_21, k_12, -k_21),
                 2,2, byrow=TRUE)
     T_K <- -(k_10 + k_12 + k_21)
@@ -41,5 +45,6 @@ pk_basic_solution <-
     c_2 <- function(t)
       gamma[2] + r[1]*N[2,1]*exp(lambda[1]*t) +
       r[2]*N[2,2]*exp(lambda[2]*t)
-    return(list(c_1=c_1, c_2=c_2))
+
+    return(list(c_1 = c_1, c_2 = c_2))
   }

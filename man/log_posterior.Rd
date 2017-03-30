@@ -2,15 +2,15 @@
 % Please edit documentation in R/log_posterior.R
 \name{log_posterior}
 \alias{log_posterior}
-\title{Log posterior for PK parameters}
+\title{Log-posterior for PK parameters}
 \usage{
 log_posterior(lpr, ivt, dat)
 }
 \arguments{
-\item{lpr}{log-PK parameter vector}
+\item{lpr}{log-PK parameter vector with error: (lv_1, lk_10, lk_12, lk_21, ler_mean)}
 
-\item{ivt}{List with containing start of infusion times, end of infusion times,
-and rate of infusion at each dose}
+\item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
+and rate of infusion (g/h) at each dose}
 
 \item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mg_dl)}
 }
@@ -18,5 +18,6 @@ and rate of infusion at each dose}
 The log-posterior distribution evaluated at the specified log-parameter vector
 }
 \description{
-Log posterior for PK parameters
+Evaluates the prior distribution (normal) of the log parameter vector with
+normally distributed error.
 }

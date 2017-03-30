@@ -4,21 +4,34 @@
 \alias{log_likelihood}
 \title{Log-likelihood for PK parameters}
 \usage{
-log_likelihood(lpr, ivt, dat, ini = c(0, 0))
+log_likelihood(lpr, ivt, dat, init = c(0, 0))
 }
 \arguments{
-\item{lpr}{log-PK parameter vector}
+\item{lpr}{log-PK parameter vector with error: (lv_1, lk_10, lk_12, lk_21, ler_mean)}
 
-\item{ivt}{List with containing start of infusion times, end of infusion times,
-and rate of infusion at each dose}
+\item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
+and rate of infusion (g/h) at each dose}
 
-\item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mg_dl)}
+\item{dat}{Concentration data frame of the form: data.frame(time (h), concentration (milligrams/dl))}
 
-\item{ini}{Initial concentrations in each compartment}
+\item{init}{Initial concentrations in each compartment}
 }
 \value{
 The value of the log-likelihood evaluated at the specified log-parameter vector
 }
 \description{
-Log-likelihood for PK parameters
+Evaluates the prior distribution (normal) of the log parameter vector with
+normally distributed error.
+}
+\examples{
+lpk_mean_d <- c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)
+ler_mean_d <- 2.33
+lpr_d  <- c(lpk_mean_d, ler_mean_d)
+
+ivt_d <- list(list(begin=0.0, end=0.5, k_R=6),
+              list(begin=8.0, end=8.5, k_R=6),
+              list(begin=16.0, end=16.5, k_R=6))
+dat_d <- data.frame(time_h = c(1,4,40), conc_mg_dl = c(82.7,80.4,60))
+
+log_likelihood(lpr_d, ivt_d, dat_d)
 }
