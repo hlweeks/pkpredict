@@ -14,7 +14,7 @@ fdGrad(pars, fun, ..., .relStep = (.Machine$double.eps)^(1/2),
 
 \item{...}{Other arguments for \code{fun} not involved in gradient computation}
 
-\item{.relStep}{Amount}
+\item{.relStep}{Amount to shift parameter values when calculating gradient}
 
 \item{minAbsPar}{Minimum absolute parameter value}
 }

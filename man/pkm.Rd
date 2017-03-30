@@ -8,24 +8,25 @@ pkm(pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 = -7, lerr =
   2.33), ivt, dat, alp = 0.05, cod = 12, thres = 64)
 }
 \arguments{
+\item{pars}{Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)}
+
 \item{ivt}{List with containing start of infusion times, end of infusion times,
 and rate of infusion at each dose}
 
-\item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mg_dl)}
+\item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)}
 
 \item{alp}{Value of alpha to use for generating pointwise 1 - alpha confidence bands}
 
 \item{cod}{Length of time after end of last dose to consider}
 
 \item{thres}{Threshold for effective treatment}
-
-\item{est}{Estimate obtained from \code{optim} function with \code{Hessian = TRUE}}
 }
 \value{
 posterior estimates
 }
 \description{
-Posterior concentration estimates
+Fits a two-compartment model to obtain posterior estimates of concentration of drug
+over time.
 }
 \examples{
 

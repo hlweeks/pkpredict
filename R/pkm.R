@@ -1,9 +1,12 @@
 #' Posterior concentration estimates
 #'
-#' @param est Estimate obtained from \code{optim} function with \code{Hessian = TRUE}
+#' Fits a two-compartment model to obtain posterior estimates of concentration of drug
+#' over time.
+#'
+#' @param pars Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)
 #' @param ivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose
-#' @param dat Concentration data frame of the form: data.frame(time_h, conc_mg_dl)
+#' @param dat Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)
 #' @param alp Value of alpha to use for generating pointwise 1 - alpha confidence bands
 #' @param cod Length of time after end of last dose to consider
 #' @param thres Threshold for effective treatment
@@ -53,8 +56,8 @@ pkm <- function(pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr 
 
 
   obj <- list()
-  obj$prior <- ?
-  obj$doseptrn <- ivt
+  obj$prior <- log_prior(pars)
+  obj$infsched <- ivt
   obj$data <- dat
   obj$optim <- est
   obj$cod <- cod
@@ -65,7 +68,6 @@ pkm <- function(pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr 
 
   obj$thresh <- thres
   obj$ftmic <- conf.int(ftmic)
-
 
 
   class(obj) <- "pkm"

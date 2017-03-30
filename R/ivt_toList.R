@@ -1,6 +1,6 @@
 #' Convert infusion schedule characteristics to list format
 #'
-#' Given vectors that characterize the infusion schedule, this helper function converts the vectors
+#' Helper function: Given vectors that characterize the infusion schedule, this helper function converts the vectors
 #' to list format for compatibility with other package functions
 #'
 #' @param begin Times at which each infusion began (relative to start of first infusion)

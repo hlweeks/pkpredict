@@ -19,7 +19,7 @@ ivt_toList(begin, end = NULL, dur = NULL, rate)
 A list characterizing the infusion schedule
 }
 \description{
-Given vectors that characterize the infusion schedule, this helper function converts the vectors
+Helper function: Given vectors that characterize the infusion schedule, this helper function converts the vectors
 to list format for compatibility with other package functions
 }
 \examples{

@@ -4,12 +4,10 @@
 \alias{confint.mic}
 \title{Confidence intervals for ftMIC statistic}
 \usage{
-\method{confint}{mic}(ftmic, est, conf.level = 0.95)
+\method{confint}{mic}(ftmic, conf.level = 0.95)
 }
 \arguments{
 \item{ftmic}{"mic" object obtained from \code{mic_stat}}
-
-\item{est}{Output from \code{optim}}
 
 \item{conf.level}{Desired confidence level of the interval}
 }

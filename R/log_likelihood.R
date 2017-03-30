@@ -21,7 +21,7 @@
 #' ivt_d <- list(list(begin=0.0, end=0.5, k_R=6),
 #'               list(begin=8.0, end=8.5, k_R=6),
 #'               list(begin=16.0, end=16.5, k_R=6))
-#' dat_d <- data.frame(time_h = c(1,4,40), conc_mg_dl = c(82.7,80.4,60))
+#' dat_d <- data.frame(time_h = c(1,4,40), conc_mcg_ml = c(82.7,80.4,60))
 #'
 #' log_likelihood(lpr_d, ivt_d, dat_d)
 
@@ -31,9 +31,9 @@ log_likelihood <- function(lpr, ivt, dat, init = c(0,0)) {
   sol <- pk_solution(v_1 = epr[1], k_10 = epr[2],
                      k_12 = epr[3], k_21 = epr[4], ivt = ivt, init = init)
 
-  colnames(dat) <- c("time_h", "conc_mg_dl")
+  colnames(dat) <- c("time_h", "conc_mcg_ml")
   dat$pconc_g_l   <- sol(dat$time_h)[1,]
-  dat$pconc_mg_dl <- 1000*dat$pconc_g_l
+  dat$pconc_mcg_ml <- 1000*dat$pconc_g_l
 
-  with(dat, sum(dnorm(conc_mg_dl, pconc_mg_dl, epr[5], log=TRUE)))
+  with(dat, sum(dnorm(conc_mcg_ml, pconc_mcg_ml, epr[5], log=TRUE)))
 }

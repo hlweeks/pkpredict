@@ -30,7 +30,7 @@ plot.pkm <- function(object, alp = 0.05){
 
   ## Plot measured points
   dat <- object$data
-  points(dat$time_h, dat$conc_mg_dl, pch=16)
+  points(dat$time_h, dat$conc_mcg_ml, pch=16)
 
   ## Create legend
   legend('topleft', c("Predicted", "95% Credible Band", "Measured"),

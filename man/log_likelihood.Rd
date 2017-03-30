@@ -31,7 +31,7 @@ lpr_d  <- c(lpk_mean_d, ler_mean_d)
 ivt_d <- list(list(begin=0.0, end=0.5, k_R=6),
               list(begin=8.0, end=8.5, k_R=6),
               list(begin=16.0, end=16.5, k_R=6))
-dat_d <- data.frame(time_h = c(1,4,40), conc_mg_dl = c(82.7,80.4,60))
+dat_d <- data.frame(time_h = c(1,4,40), conc_mcg_ml = c(82.7,80.4,60))
 
 log_likelihood(lpr_d, ivt_d, dat_d)
 }

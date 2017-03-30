@@ -4,24 +4,37 @@
 \alias{mic_stat}
 \title{Time Above Pharmacokinetic Threshold}
 \usage{
-mic_stat(pk_pars, ivt, tms, con, th)
+mic_stat(pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 = -7, lerr =
+  2.33), ivt, dat, th, times = NULL, cod = 12, con = NULL, init = c(0,
+  0))
 }
 \arguments{
-\item{pk_pars}{Vector of pharmacokinetic parameters of length 4: (v_1, k_10, k_12, k_21)}
+\item{pars}{Vector of pharmacokinetic parameters of length 5: (log(v_1), log(k_10), log(k_12), log(k_21), log(err))}
 
-\item{ivt}{List with containing start of infusion times, end of infusion times,
-and rate of infusion at each dose}
+\item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
+and rate of infusion (g/h) at each dose}
 
-\item{tms}{Times to use in function evaluation}
+\item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)}
+
+\item{th}{Threshold value for effective treatment - check units}
+
+\item{cod}{Length of time after end of last dose to consider}
 
 \item{con}{Concentration of drug at each of the specified times}
 
-\item{th}{Threshold value for effective treatment}
+\item{init}{Initial concentrations in c(central, peripheral) compartments}
+
+\item{tms}{Times to use in function evaluation}
 }
 \value{
 Fraction of time spent above the specified threshold from time of first dose through
-12 hours after end of the last dose
+\code{cod} hours after end of the last dose
 }
 \description{
-Time Above Pharmacokinetic Threshold
+Compute an estimate of pharmacodynamic target attainment, typically defined
+to be some multiple of the minimum inhibitory concentration of the infecting microorganism
+}
+\examples{
+
+
 }

@@ -3,10 +3,11 @@
 #' Compute an estimate of pharmacodynamic target attainment, typically defined
 #' to be some multiple of the minimum inhibitory concentration of the infecting microorganism
 #'
-#' @param pk_pars Vector of pharmacokinetic parameters of length 4: (v_1, k_10, k_12, k_21)
-#' @param th Threshold value for effective treatment - check units
+#' @param pars Vector of pharmacokinetic parameters of length 5: (log(v_1), log(k_10), log(k_12), log(k_21), log(err))
 #' @param ivt List with containing start of infusion times (h), end of infusion times (h),
 #' and rate of infusion (g/h) at each dose
+#' @param dat Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)
+#' @param th Threshold value for effective treatment - check units
 #' @param tms Times to use in function evaluation
 #' @param cod Length of time after end of last dose to consider
 #' @param con Concentration of drug at each of the specified times
@@ -16,8 +17,19 @@
 #' \code{cod} hours after end of the last dose
 #'
 #' @export
+#'
+#' @examples
+#'
+#'
 
-mic_stat <- function(pk_pars, th, ivt, times = NULL, cod = 12, con = NULL, init = c(0,0)){
+mic_stat <- function(pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
+                     ivt, dat, th,
+                     times = NULL, cod = 12, con = NULL, init = c(0,0)){
+
+  est <- optim(pars, log_posterior, ivt = ivt, dat = dat,
+               control = list(fnscale=-1), hessian=TRUE)
+
+
   if(!is.null(times) & !is.null(con)){
     if(length(times) != length(con)) stop("times and con must be of the same length")
   }
@@ -54,9 +66,12 @@ mic_stat <- function(pk_pars, th, ivt, times = NULL, cod = 12, con = NULL, init 
     conc <- con[1,]
   }else{conc <- con}
 
+
+
+
   # Get PK solution equation evaluated at parameters
-  soln <- pk_solution(v_1=exp(pk_pars[1]), k_10=exp(pk_pars[2]),
-                      k_12=exp(pk_pars[3]), k_21=exp(pk_pars[4]), ivt=ivt)
+  soln <- pk_solution(v_1=exp(est$par[1]), k_10=exp(est$par[2]),
+                      k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=ivt)
   # Use PK solution to define function that computes
   #   the concentrations centered by threshold
   f_mic <- function(times = tms){
@@ -103,7 +118,10 @@ mic_stat <- function(pk_pars, th, ivt, times = NULL, cod = 12, con = NULL, init 
   }
 
   # Use time spent above threshold to compute proportion
-  ftmic <- t_above/max(tms)
+  ftmic <- list("ftmic" = t_above/max(tms),
+                "est" = est,
+                "ivt" = ivt, "dat" = dat,
+                "tms" = tms, "con" = con, "th" = th)
 
   class(ftmic) <- c("mic", class(ftmic))
 

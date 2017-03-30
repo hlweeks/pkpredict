@@ -8,6 +8,7 @@
 #' @examples
 #'
 
+# have newivt and newdat both initialized to null, at least one must be provided
 predict.pkm <- function(object, newivt){
 
   tms <- sapply(newivt, function(x) c(x$begin, x$end))
@@ -33,4 +34,7 @@ predict.pkm <- function(object, newivt){
   sol <- pk_solution(v_1=exp(est$par[1]), k_10=exp(est$par[2]),
                      k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=newivt)
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
+
+  res <- data.frame("conc" = con, "tms" = tms)
+  return(res)
 }
