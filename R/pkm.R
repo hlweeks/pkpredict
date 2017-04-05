@@ -3,22 +3,35 @@
 #' Fits a two-compartment model to obtain posterior estimates of concentration of drug
 #' over time.
 #'
+#' @param formula A formula where the left side is the measured concentration of drug
+#' and the right side is the times of concentration measurements
+#' @param data Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
 #' @param pars Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)
 #' @param ivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose
-#' @param dat Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)
-#' @param alp Value of alpha to use for generating pointwise 1 - alpha confidence bands
+#' @param alp Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands
 #' @param cod Length of time after end of last dose to consider
-#' @param thres Threshold for effective treatment
+#' @param thres Threshold for effective treatment (mcg/ml)
+#'
+#' @details Measurements must be entered in particular units: mcg/ml for concentrations, g/h in rate of
+#' infusion, hours for times.
 #'
 #' @return posterior estimates
 #' @export
 #'
 #' @examples
+#' # Insert example from Bayes.R
 #'
 
-pkm <- function(pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
-                ivt, dat, alp=0.05, cod=12, thres=64) {
+pkm <- function(formula, data,
+                pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
+                ivt, alp=0.05, cod=12, thres=64) {
+
+  dat <- model.frame(formula, data)
+  # Currently, should only have time and concentration data
+  if(ncol(dat) > 2){stop("Too many variables in formula")}
+
+  colnames(dat) <- c("time_h", "conc_mcg_ml")
 
   est <- optim(pars, log_posterior, ivt = ivt, dat = dat,
                control = list(fnscale=-1), hessian=TRUE)
@@ -52,7 +65,8 @@ pkm <- function(pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr 
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
   # MIC statistic information
-  ftmic <- mic_stat(pk_pars = est$par, ivt, tms, con[1,], th = thres)
+  ftmic <- mic_stat(pk_pars = est$par, ivt, dat,
+                    tms, con[1,], th = thres)
 
 
   obj <- list()

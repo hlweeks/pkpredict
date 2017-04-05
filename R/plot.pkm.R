@@ -1,11 +1,13 @@
-#' Title
+#' Plot method for PK model
 #'
-#' @param object
+#' @param object An object of class \code{pkm}
+#' @param alp Value used to produce (1 - \code{alp})% credible intervals
 #'
-#' @return
+#' @return Concentration-time curve for the fitted pharmacokinetic model
 #' @export
 #'
 #' @examples
+
 plot.pkm <- function(object, alp = 0.05){
   col_bg <- "#AAAAB5"
   col_fg <- "#3E465A"
@@ -38,9 +40,9 @@ plot.pkm <- function(object, alp = 0.05){
          border=NA, bty='n')
 
   #Plotting elements for mic statistic
+  ftmic <- object$ftmic
   abline(h = thres, lty = 2)
-
   legend("topright", bty = 'n',
-         legend = c(paste("fT > threshold:", round(frac_mic, 3)),
-                    paste("95% CI: (", round(ci_mic[1], 3), ",", round(ci_mic[2], 3), ")")))
+         legend = c(paste("fT > threshold:", round(ftmic[1], 3)),
+                    paste("95% CI: (", round(ftmic[2], 3), ",", round(ftmic[3], 3), ")")))
 }

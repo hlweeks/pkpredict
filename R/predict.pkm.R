@@ -1,6 +1,8 @@
 #' Predict method for PK model
 #'
 #' @param object Object of class "pkm"
+#' @param newivt List with containing start of infusion times, end of infusion times,
+#' and rate of infusion at each dose for which predictions will be obtained
 #'
 #' @return
 #' @export
@@ -8,8 +10,10 @@
 #' @examples
 #'
 
-# have newivt and newdat both initialized to null, at least one must be provided
 predict.pkm <- function(object, newivt){
+
+  # Parameter estimates from fitted pkm model
+  est <- object$est
 
   tms <- sapply(newivt, function(x) c(x$begin, x$end))
   tms <- c(tms, max(tms)+cod)
@@ -21,7 +25,6 @@ predict.pkm <- function(object, newivt){
   }))
   tms <- pmax(1e-3, tms)
 
-  est <- object$est
   grd <- fdGrad(est$par, function(pars) {
     sol <- pk_solution(v_1=exp(pars[1]), k_10=exp(pars[2]),
                        k_12=exp(pars[3]), k_21=exp(pars[4]), ivt=newivt)
@@ -35,6 +38,12 @@ predict.pkm <- function(object, newivt){
                      k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=newivt)
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
-  res <- data.frame("conc" = con, "tms" = tms)
+  # Predicted ft>mic estimate
+  ftmic <- mic_stat(pk_pars = est$par, newivt, object$data,
+                    tms, con[1,], th = object$thresh)
+
+  res <- list("predict" = data.frame("conc" = con, "tms" = tms),
+              "infsched" = newivt,
+              "pftmic" = confint(ftmic))
   return(res)
 }
