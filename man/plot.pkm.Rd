@@ -2,13 +2,18 @@
 % Please edit documentation in R/plot.pkm.R
 \name{plot.pkm}
 \alias{plot.pkm}
-\title{Title}
+\title{Plot method for PK model}
 \usage{
 \method{plot}{pkm}(object, alp = 0.05)
 }
 \arguments{
-\item{object}{}
+\item{object}{An object of class \code{pkm}}
+
+\item{alp}{Value used to produce (1 - \code{alp})% credible intervals}
+}
+\value{
+Concentration-time curve for the fitted pharmacokinetic model
 }
 \description{
-Title
+Plot method for PK model
 }

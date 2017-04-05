@@ -4,22 +4,25 @@
 \alias{pkm}
 \title{Posterior concentration estimates}
 \usage{
-pkm(pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 = -7, lerr =
-  2.33), ivt, dat, alp = 0.05, cod = 12, thres = 64)
+pkm(formula, data, pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 =
+  -7, lerr = 2.33), ivt, alp = 0.05, cod = 12, thres = 64)
 }
 \arguments{
+\item{formula}{A formula where the left side is the measured concentration of drug
+and the right side is the times of concentration measurements}
+
+\item{data}{Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)}
+
 \item{pars}{Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)}
 
 \item{ivt}{List with containing start of infusion times, end of infusion times,
 and rate of infusion at each dose}
 
-\item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)}
-
-\item{alp}{Value of alpha to use for generating pointwise 1 - alpha confidence bands}
+\item{alp}{Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands}
 
 \item{cod}{Length of time after end of last dose to consider}
 
-\item{thres}{Threshold for effective treatment}
+\item{thres}{Threshold for effective treatment (mcg/ml)}
 }
 \value{
 posterior estimates
@@ -28,6 +31,11 @@ posterior estimates
 Fits a two-compartment model to obtain posterior estimates of concentration of drug
 over time.
 }
+\details{
+Measurements must be entered in particular units: mcg/ml for concentrations, g/h in rate of
+infusion, hours for times.
+}
 \examples{
+# Insert example from Bayes.R
 
 }

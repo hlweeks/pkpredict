@@ -4,10 +4,21 @@
 \alias{update.pkm}
 \title{Update method for PK model}
 \usage{
-\method{update}{pkm}(pkm)
+\method{update}{pkm}(object, formula, newdat = NULL, newivt = NULL)
 }
 \arguments{
-\item{pkm}{An object of class "pkm}
+\item{object}{An object of class "pkm}
+
+\item{formula}{A formula where the left side is the measured concentration of drug
+and the right side is the times of concentration measurements}
+
+\item{newivt}{List with containing start of infusion times, end of infusion times,
+and rate of infusion at each dose for which predictions will be obtained}
+
+\item{data}{Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)}
+}
+\value{
+Updated PK model
 }
 \description{
 Update method for PK model

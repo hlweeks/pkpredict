@@ -8,6 +8,9 @@
 }
 \arguments{
 \item{object}{Object of class "pkm"}
+
+\item{newivt}{List with containing start of infusion times, end of infusion times,
+and rate of infusion at each dose for which predictions will be obtained}
 }
 \description{
 Predict method for PK model
