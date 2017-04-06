@@ -8,6 +8,8 @@
 #' log(error) ~ N(ler_mean, ler_sdev)
 #' Default values are based on a prior study [cite]
 #'
+#' @import mvtnorm
+#'
 #' @param lpr log-PK parameter vector with error: (lv_1, lk_10, lk_12, lk_21, ler_mean)
 #' @param mu log-mean of the PK parameter distribution
 #' @param sig log-variance-covariance matrix of the PK parameter distribution
@@ -38,6 +40,6 @@ log_prior <- function(lpr, mu = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = 
                                                     0,         0, .00015,      0,
                                                     0,         0,      0, .00015), 4, 4),
                       ler_mean = 2.33, ler_sdev = 0.32){
-  dmvnorm(lpr[1:4], mu, sig, log = TRUE) +
+  mvtnorm::dmvnorm(lpr[1:4], mu, sig, log = TRUE) +
   dnorm(lpr[5], mean=ler_mean, sd=ler_sdev, log=TRUE)
 }

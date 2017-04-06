@@ -1,14 +1,13 @@
 Package: pkpredict
 Title: Compartment Model Implementation for Pharmacokinetic Analysis
 Version: 0.0.1
-Depends: Depends: R (>= 3.3.2)
 Authors@R: c(person("Matthew", "Shotwell", email = "matt.shotwell@vanderbilt.edu", role = c("aut")),
              person("Hannah", "Weeks", email = "hannah.weeks@vanderbilt.edu", role = c("aut", "cre")))
 Description: Contains functions to perform analyses associated with pharmacokinetic modeling. 
  (Further explanation required) 
 Depends: R (>= 3.3.2), mvtnorm
 Imports: stats, graphics
-URL: insertGithubURL
+URL: https://github.com/hlweeks/pkpredict
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

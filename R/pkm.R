@@ -7,7 +7,7 @@
 #'
 #' @param formula A formula where the left side is the measured concentration of drug
 #' and the right side is the times of concentration measurements
-#' @param data Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
+#' @param dat Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
 #' @param pars Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)
 #' @param ivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose
@@ -25,11 +25,11 @@
 #' # Insert example from Bayes.R
 #'
 
-pkm <- function(formula, data,
+pkm <- function(formula, dat,
                 pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                 ivt, alp=0.05, cod=12, thres=64) {
 
-  dat <- model.frame(formula, data)
+  dat <- model.frame(formula, dat)
   # Currently, should only have time and concentration data
   if(ncol(dat) > 2){stop("Too many variables in formula")}
 
@@ -76,6 +76,7 @@ pkm <- function(formula, data,
   obj$infsched <- ivt
   obj$data <- dat
   obj$optim <- est
+  obj$alpha <- alp
   obj$cod <- cod
 
   obj$times <- tms
@@ -83,8 +84,7 @@ pkm <- function(formula, data,
   obj$se_con <- sde
 
   obj$thresh <- thres
-  obj$ftmic <- conf.int(ftmic)
-
+  obj$ftmic <- confint(ftmic)
 
   class(obj) <- "pkm"
 

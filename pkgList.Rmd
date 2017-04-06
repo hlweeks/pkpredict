@@ -10,6 +10,10 @@ Actually, I haven't implemented this next bullet point yet. I would like to revi
 * A note on units: functions have been recoded to have all inputs on the scale of interest: mcg/mL (**VERIFY** - we used to be providing information on the scale of mcg/mL then multiplying the pk solution by 1000 for unit compatibility. Now, we are forcing people to enter ...(rate?)... as mcg/mL)   
 * Also in `predict.pkm` (check other functions)  
 
+#Hmm...  
+
+* Formulas are in place to grab the appropriate data for the observed concentration-time data, but not for the ivt matrix. Maybe make the `ivt_toList` function formula-oriented? Not sure it's feasible to have two formula inputs for functions set up to deal with concentraion ~ time  
+
 
 ##Reminders  
 
