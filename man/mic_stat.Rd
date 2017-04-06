@@ -18,13 +18,13 @@ and rate of infusion (g/h) at each dose}
 
 \item{th}{Threshold value for effective treatment - check units}
 
+\item{times}{Times to use in function evaluation}
+
 \item{cod}{Length of time after end of last dose to consider}
 
 \item{con}{Concentration of drug at each of the specified times}
 
 \item{init}{Initial concentrations in c(central, peripheral) compartments}
-
-\item{tms}{Times to use in function evaluation}
 }
 \value{
 Fraction of time spent above the specified threshold from time of first dose through

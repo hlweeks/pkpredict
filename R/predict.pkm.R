@@ -39,7 +39,7 @@ predict.pkm <- function(object, newivt){
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
   # Predicted ft>mic estimate
-  ftmic <- mic_stat(pk_pars = est$par, newivt, object$data,
+  ftmic <- mic_stat(pars = est$par, newivt, object$data,
                     tms, con[1,], th = object$thresh)
 
   res <- list("predict" = data.frame("conc" = con, "tms" = tms),

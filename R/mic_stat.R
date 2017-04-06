@@ -8,7 +8,7 @@
 #' and rate of infusion (g/h) at each dose
 #' @param dat Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)
 #' @param th Threshold value for effective treatment - check units
-#' @param tms Times to use in function evaluation
+#' @param times Times to use in function evaluation
 #' @param cod Length of time after end of last dose to consider
 #' @param con Concentration of drug at each of the specified times
 #' @param init Initial concentrations in c(central, peripheral) compartments
@@ -74,8 +74,8 @@ mic_stat <- function(pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, 
                       k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=ivt)
   # Use PK solution to define function that computes
   #   the concentrations centered by threshold
-  f_mic <- function(times = tms){
-    val <- apply(soln(times)*1000, 2, function(x) pmax(0,x)) - th
+  f_mic <- function(ts = tms){
+    val <- apply(soln(ts)*1000, 2, function(x) pmax(0,x)) - th
     return(val[1,])
   }
 

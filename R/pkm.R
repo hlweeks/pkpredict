@@ -3,6 +3,8 @@
 #' Fits a two-compartment model to obtain posterior estimates of concentration of drug
 #' over time.
 #'
+#' @import stats graphics
+#'
 #' @param formula A formula where the left side is the measured concentration of drug
 #' and the right side is the times of concentration measurements
 #' @param data Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
@@ -65,7 +67,7 @@ pkm <- function(formula, data,
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
   # MIC statistic information
-  ftmic <- mic_stat(pk_pars = est$par, ivt, dat,
+  ftmic <- mic_stat(pars = est$par, ivt, dat,
                     tms, con[1,], th = thres)
 
 

@@ -19,10 +19,10 @@
 #' ivt_toList(begin = b, end = e, rate = r)
 
 ivt_toList <- function(begin, end = NULL, dur = NULL, rate){
-  if(is.null(end) & is.null(duration)){
+  if(is.null(end) & is.null(dur)){
     stop('At least one of end or dur must be specified')
   }
-  if(!is.null(end) & !is.null(duration)){
+  if(!is.null(end) & !is.null(dur)){
     stop('Only one of end or dur can be specified')
   }
 

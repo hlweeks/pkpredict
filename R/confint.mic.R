@@ -17,7 +17,7 @@ confint.mic <- function(ftmic, conf.level = .95){
   # SE of logit(statistic)
   grd_mic <- fdGrad(est$par, function(pars) {
     mic <- mic_stat(pars, ivt = ftmic$ivt, dat = ftmic$dat,
-                    tms = ftmic$tms, con = ftmic$con, th = ftmic$th)
+                    times = ftmic$tms, con = ftmic$con, th = ftmic$th)
     log(mic/(1-mic)) ## constrain between 0 and 1
   })
   sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
