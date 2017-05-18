@@ -143,7 +143,7 @@ library(xtable)
 \end{itemize}
 
 <<>>=
-# devtools::install_github("hlweeks/pkpredict")
+devtools::install_github("hlweeks/pkpredict")
 library(pkpredict)
 @
 
