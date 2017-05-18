@@ -40,6 +40,9 @@ log_prior <- function(lpr, mu = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = 
                                                     0,         0, .00015,      0,
                                                     0,         0,      0, .00015), 4, 4),
                       ler_mean = 2.33, ler_sdev = 0.32){
-  mvtnorm::dmvnorm(lpr[1:4], mu, sig, log = TRUE) +
-  dnorm(lpr[5], mean=ler_mean, sd=ler_sdev, log=TRUE)
+
+  val <- mvtnorm::dmvnorm(lpr[1:4], mu, sig, log = TRUE) +
+    dnorm(lpr[5], mean=ler_mean, sd=ler_sdev, log=TRUE)
+  names(val) <- NULL
+  return(val)
 }

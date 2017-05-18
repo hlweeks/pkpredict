@@ -4,25 +4,25 @@
 \alias{pkm}
 \title{Posterior concentration estimates}
 \usage{
-pkm(formula, dat, pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 =
-  -7, lerr = 2.33), ivt, alp = 0.05, cod = 12, thres = 64)
+pkm(formula, data, subset, ivt, pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 =
+  -7, lk_21 = -7, lerr = 2.33), alp = 0.05, cod = 12, thres = 64, ...)
 }
 \arguments{
 \item{formula}{A formula where the left side is the measured concentration of drug
 and the right side is the times of concentration measurements}
 
-\item{dat}{Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)}
-
-\item{pars}{Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)}
-
 \item{ivt}{List with containing start of infusion times, end of infusion times,
 and rate of infusion at each dose}
+
+\item{pars}{Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)}
 
 \item{alp}{Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands}
 
 \item{cod}{Length of time after end of last dose to consider}
 
 \item{thres}{Threshold for effective treatment (mcg/ml)}
+
+\item{dat}{Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)}
 }
 \value{
 posterior estimates
@@ -37,5 +37,5 @@ infusion, hours for times.
 }
 \examples{
 # Insert example from Bayes.R
-
+pkm(concentration ~ time, dat_d, ivt_d) # something like this
 }

@@ -5,6 +5,8 @@ output: html_document
 
 #Notes
 
+* `mic_stat` isn't a model object, but should I still use `formula` and `model.frame` to ensure the appropriate columns are selected?  
+* Need to make `pkm` able to produce prior estimates in absence of observed data...is it ok to initilize `formula` and `data` to `NULL`?  
 * Write `print` method for `pkm`  
 Actually, I haven't implemented this next bullet point yet. I would like to revisit it, since I think it feel more intuitive to force people to supply values on the mcg/mL (measurement) scale and manually convert within the function, rather than making them do the conversion on their own. It also seems more intuitive to enter "6 g/h" than to have to do "6,000 mg/h"  
 
@@ -19,6 +21,8 @@ Actually, I haven't implemented this next bullet point yet. I would like to revi
 
 ##Reminders  
 
+* Change `mic_stat` to have `times` be a min/max (interval) argument, rather than a vector of times. Don't forget to appropriately change the output to match this  
+* Add ui/server functions to produce shiny app  
 * Change `cod` argument name to something more intuitive  
 * Rename `pk_basic_solution` and `pk_solution` to more clearly delineate the difference  
 * Come back to `log_prior`: Current have default values both coded into the function and as an example. Probably don't need both.  

@@ -4,27 +4,22 @@
 \alias{mic_stat}
 \title{Time Above Pharmacokinetic Threshold}
 \usage{
-mic_stat(pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 = -7, lerr =
-  2.33), ivt, dat, th, times = NULL, cod = 12, con = NULL, init = c(0,
-  0))
+mic_stat(ivt, th, pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 =
+  -7, lerr = 2.33), timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
+  cod = 12)
 }
 \arguments{
-\item{pars}{Vector of pharmacokinetic parameters of length 5: (log(v_1), log(k_10), log(k_12), log(k_21), log(err))}
-
 \item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
 and rate of infusion (g/h) at each dose}
 
-\item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mcg_ml)}
-
 \item{th}{Threshold value for effective treatment - check units}
 
-\item{times}{Times to use in function evaluation}
+\item{pars}{Vector of pharmacokinetic parameters of length 5: (log(v_1), log(k_10), log(k_12), log(k_21), log(err))}
+
+\item{timeint}{Vector with two elements indicating the start and end of the time interval over which
+the statistic is computed}
 
 \item{cod}{Length of time after end of last dose to consider}
-
-\item{con}{Concentration of drug at each of the specified times}
-
-\item{init}{Initial concentrations in c(central, peripheral) compartments}
 }
 \value{
 Fraction of time spent above the specified threshold from time of first dose through

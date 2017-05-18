@@ -3,6 +3,7 @@
 S3method(confint,mic)
 S3method(plot,pkm)
 S3method(predict,pkm)
+S3method(print,pkm)
 S3method(update,pkm)
 export(fdGrad)
 export(ivt_toList)

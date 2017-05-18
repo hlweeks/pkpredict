@@ -8,7 +8,8 @@
 #' @param formula A formula where the left side is the measured concentration of drug
 #' and the right side is the times of concentration measurements
 #' @param dat Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
-#' @param pars Vector of pharmacokinetic parameters of length 5: (v_1, k_10, k_12, k_21, err)
+#' @param subset Subset of the \code{dat} data frame to use
+#' @param pars Vector of (prior) log-pharmacokinetic parameters of length 5: (lv_1, lk_10, lk_12, lk_21, lerr)
 #' @param ivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose
 #' @param alp Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands
@@ -23,34 +24,46 @@
 #'
 #' @examples
 #' # Insert example from Bayes.R
-#'
+#' pkm(concentration ~ time, dat_d, ivt_d) # something like this
 
-pkm <- function(formula, dat,
+pkm <- function(formula, data, subset, ivt,
                 pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
-                ivt, alp=0.05, cod=12, thres=64) {
+                alp=0.05, cod=12, thres=64,
+                timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod), ...) {
 
-  dat <- model.frame(formula, dat)
-  # Currently, should only have time and concentration data
-  if(ncol(dat) > 2){stop("Too many variables in formula")}
+  # Allows formula, data, and subset to be optional (for prior only)
+  mc <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data", "subset"), names(mc), 0L)
 
-  colnames(dat) <- c("time_h", "conc_mcg_ml")
+  if(sum(m) > 0){
+    mc <- mc[c(1L, m)]
+    mc$drop.unused.levels <- TRUE
+    mc[[1L]] <- as.name("model.frame")
+    dat <- eval(mc, parent.frame())
 
+
+    # Currently, should only have time and concentration data
+    if(ncol(dat) > 2){stop("Too many variables in formula")}
+
+    colnames(dat) <- c("conc_mcg_ml", "time_h")
+    dat <- dat[, c("time_h", "conc_mcg_ml")]
+  }else{
+    dat <- data.frame()
+  }
+
+  # Only depends on pars if nrow(dat) == 0
   est <- optim(pars, log_posterior, ivt = ivt, dat = dat,
                control = list(fnscale=-1), hessian=TRUE)
 
-
-  ## Compute plotting times
-  ## - ensure peak and trough times
-  ## - avoid time zero
-  tms <- sapply(ivt, function(x) c(x$begin, x$end))
-  tms <- c(tms, max(tms)+cod)
-  tms <- unlist(sapply(1:(length(tms)-1), function(i) {
-    s1 <- seq(tms[i], tms[i+1], 1/10)
-    if(tms[i+1] %% 1/10)
-      s1 <- c(s1, tms[i+1])
-    return(s1)
-  }))
+  # Times at which to compute concentration estimates and SE: dose and concentration meas times
+  tms <- c(sapply(ivt, function(x) x$begin),
+           sapply(ivt, function(x) x$end))
+  if(nrow(dat) > 0){tms <- c(tms, dat$time_h)}
+  tms <- sort(unique(tms))
+  # Prevent log(0)
   tms <- pmax(1e-3, tms)
+
+
 
   ## Approximate standard deviation of log concentration-time curve
   grd <- fdGrad(est$par, function(pars) {
@@ -67,24 +80,45 @@ pkm <- function(formula, dat,
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
   # MIC statistic information
-  ftmic <- mic_stat(pars = est$par, ivt, dat,
-                    tms, con[1,], th = thres)
+  ftmic <- mic_stat(ivt = ivt, th = thres,
+                    pars = est$par, cod = cod)
 
+  # SE of MIC statistic (logit-transformed)
+  grd_mic <- fdGrad(est$par, function(pars) {
+    mic <- mic_stat(ivt = ivt, th = thres,
+                    pars = pars, timeint = timeint, cod = cod)$ftmic
+    log(mic/(1-mic)) ## constrain between 0 and 1
+  })
+  sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
 
-  obj <- list()
-  obj$prior <- log_prior(pars)
-  obj$infsched <- ivt
-  obj$data <- dat
-  obj$optim <- est
-  obj$alpha <- alp
-  obj$cod <- cod
+  # Get CI for logit transformed statistic then backtransform to original scale
+  ci_logit_mic <- log(ftmic$ftmic/(1-ftmic$ftmic)) + c(-1,1)*qnorm(1-alp/2)*sde_mic
+  ci_mic <- exp(ci_logit_mic)/(1 + exp(ci_logit_mic))
 
-  obj$times <- tms
-  obj$fitted.values <- con
-  obj$se_con <- sde
+  obj <- list(#"call" = match.call(),
+              # Posterior estimate
+              "optim" = est,
+              # Prior information
+              # NEED TO GET PRIOR ESTIMATES??
+              "prior" <- list("time" = tms,
+                              "conc" = xx),
 
-  obj$thresh <- thres
-  obj$ftmic <- confint(ftmic)
+              # Relevant data
+              "infsched" = ivt,
+              "data" = dat,
+              "alpha" = alp,
+              "cod" = cod,
+
+              # At infusion and observed times
+              "fitted.values" = data.frame("time" = tms,
+                                           "conc" = con[1,],
+                                           "se_con" = sde),
+
+              # ft>mic information
+              "thresh" = thres,
+              "ftmic" = list("stat" = ftmic$ftmic,
+                             "conf.int" = ci_mic)
+              )
 
   class(obj) <- "pkm"
 

@@ -10,16 +10,21 @@
 #'
 
 confint.mic <- function(ftmic, conf.level = .95){
+  if(abs(conf.level) > 1){stop("conf.level must be between 0 and 1")}
   alp <- 1 - conf.level
 
   est <- ftmic$est
 
   # SE of logit(statistic)
   grd_mic <- fdGrad(est$par, function(pars) {
+    #try extracting the est object and going direct to the time>mic computation?
+    #the optim function might be what's making this take a few seconds to run
+    #the optim function is the difference between bayes.R and this
     mic <- mic_stat(pars, ivt = ftmic$ivt, dat = ftmic$dat,
-                    times = ftmic$tms, con = ftmic$con, th = ftmic$th)
+                    times = ftmic$tms, con = ftmic$con, th = ftmic$th)$ftmic
     log(mic/(1-mic)) ## constrain between 0 and 1
   })
+
   sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
 
   # Get CI for logit transformed statistic then backtransform to original scale

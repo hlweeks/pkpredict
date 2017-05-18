@@ -26,9 +26,10 @@ ivt_toList <- function(begin, end = NULL, dur = NULL, rate){
     stop('Only one of end or dur can be specified')
   }
 
-  val <- ifelse(is.null(end), begin + dur, end)
+  val <- if(is.null(end)){begin + dur}else{end}
 
   df <- data.frame(begin, val, rate) # Will produce error is args are not of the same length
+  names(df) <- NULL
 
   ivt <- apply(df, MARGIN = 1, function(x) list(begin = x[1], end = x[2], k_R = x[3]))
 
