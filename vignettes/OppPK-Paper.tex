@@ -53,6 +53,16 @@
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Other needed packages}
+\hlkwd{library}\hlstd{(xtable)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
 % Outline:
 % 1. Introduction
 % 2. Methods
@@ -200,18 +210,20 @@ $\beta_0$  & \\
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# devtools::install_github("hlweeks/pkpredict")}
+\hlcom{#  devtools::install_github("hlweeks/pkpredict")}
 \hlkwd{library}\hlstd{(pkpredict)}
 \end{alltt}
 
 
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in library(pkpredict): there is no package called 'pkpredict'}}\end{kframe}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: mvtnorm}}\end{kframe}
 \end{knitrout}
 
+{\large note: for key functions, list the parameters that can be manipulated and what they do, default values, etc}
 
 \subsection{Sample infusion schedule and concentation data}
 package functions: \texttt{ivt\_toList}
 
+We have a vector of start times for five doses in hours since first infusion, and the duration of each dose. In this case, the duration is the same for each dose: half an hour. The rate of infusion is 6 g/h for all administered doses.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -224,13 +236,11 @@ package functions: \texttt{ivt\_toList}
 
 \hlstd{ivt_d} \hlkwb{<-} \hlkwd{ivt_toList}\hlstd{(}\hlkwc{begin} \hlstd{= start_times,} \hlkwc{dur} \hlstd{= duration,} \hlkwc{rate} \hlstd{= rate_of_infusion)}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): could not find function "{}ivt\_toList"{}}}\end{kframe}
+\end{kframe}
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu May 18 13:47:32 2017
+% Thu May 18 14:52:47 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Infusion Schedule} 
@@ -248,7 +258,7 @@ Begin (h) & End (h) & Infusion Rate (g/h) \\
 \end{table}
 
 
-
+We also have sample data from three blood draws, with information on the concentration of piperacillin in the blood in $\mu$g/mL at the time at which the blood was drawn, again in hours since first infusion.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -262,7 +272,7 @@ Begin (h) & End (h) & Infusion Rate (g/h) \\
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu May 18 13:47:32 2017
+% Thu May 18 14:52:47 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Data (observed from blood draws)} 
@@ -282,6 +292,8 @@ Time (h) & Concentration (mcg/mL) \\
 \subsection{MIC estimates}
 package functions: \texttt{mic_stat}
 
+
+We first obtain a prior estimate of target attainment ({\bf make sure this is defined above}) based on the infusion schedule outlined above. By default, the \texttt{mic\_stat} function calculates the $fT > 4 \times MIC$ (notation from paper Matt sent - make sure this notation is introduced above).
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -290,38 +302,38 @@ package functions: \texttt{mic_stat}
 
 \hlcom{# Prior estimate}
 \hlstd{prior_ft.mic} \hlkwb{<-} \hlkwd{mic_stat}\hlstd{(}\hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{th} \hlstd{=} \hlnum{64}\hlstd{)}
-\end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): could not find function "{}mic\_stat"{}}}\begin{alltt}
 \hlstd{prior_ft.mic}\hlopt{$}\hlstd{ftmic}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'prior\_ft.mic' not found}}\begin{alltt}
+\begin{verbatim}
+## [1] 0.4782617
+\end{verbatim}
+\begin{alltt}
 \hlcom{# Default parameters used}
 \hlstd{(pars} \hlkwb{<-} \hlstd{prior_ft.mic}\hlopt{$}\hlstd{pars)}
 \end{alltt}
+\begin{verbatim}
+##   lv_1  lk_10  lk_12  lk_21   lerr 
+##  3.223 -1.650 -7.000 -7.000  2.330
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
 
+Out prior estimate for target attainment indicates that on average, a patient on the specified infusion schedule will
+({\bf does the prior indicate the response of an average patient or average response across a variety of patients?})
 
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'prior\_ft.mic' not found}}\begin{alltt}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
 \hlcom{# Posterior estimate after observed measurements}
 \hlstd{est} \hlkwb{<-} \hlkwd{optim}\hlstd{(pars, log_posterior,} \hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{dat} \hlstd{= dat_d,}
              \hlkwc{control} \hlstd{=} \hlkwd{list}\hlstd{(}\hlkwc{fnscale}\hlstd{=}\hlopt{-}\hlnum{1}\hlstd{),} \hlkwc{hessian}\hlstd{=}\hlnum{TRUE}\hlstd{)}
-\end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in optim(pars, log\_posterior, ivt = ivt\_d, dat = dat\_d, control = list(fnscale = -1), : object 'pars' not found}}\begin{alltt}
 \hlstd{post_ft.mic} \hlkwb{<-} \hlkwd{mic_stat}\hlstd{(}\hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{th} \hlstd{=} \hlnum{64}\hlstd{,} \hlkwc{pars} \hlstd{= est}\hlopt{$}\hlstd{par)}
-\end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): could not find function "{}mic\_stat"{}}}\begin{alltt}
 \hlstd{post_ft.mic}\hlopt{$}\hlstd{ftmic}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'post\_ft.mic' not found}}\end{kframe}
+\begin{verbatim}
+## [1] 0.7352296
+\end{verbatim}
+\end{kframe}
 \end{knitrout}
 
 In order to get confidence intervals for these estimates, it is necessary to fit the PK model.
@@ -337,7 +349,7 @@ package functions: \texttt{pkm}
 \end{alltt}
 
 
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): could not find function "{}pkm"{}}}\begin{alltt}
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in pkm(formula = con \textasciitilde{} time, data = dat\_d, ivt = ivt\_d, thres = 64): object 'xx' not found}}\begin{alltt}
 \hlstd{pk.fit}\hlopt{$}\hlstd{ftmic}
 \end{alltt}
 

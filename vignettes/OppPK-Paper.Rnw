@@ -2,6 +2,12 @@
 \usepackage{amsmath,underscore}
 \begin{document}
 
+<<>>=
+# Other needed packages
+library(xtable)
+@
+
+
 % Outline:
 % 1. Introduction
 % 2. Methods
@@ -97,7 +103,54 @@ For each of the 50 sets of prior parameters and simulated data:
 	 \item 3,000 samples from the posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm with 2,000 warm-up iterations. The proportion of the 3,000 posterior samples falling within the upper and lower bounds was used to estimate the proportion of the posterior distribution of the MIC statistic falling within the confidence interval.
 \end{itemize}
 
+%Update these numbers with 1000 simulations
+{\it replace}
 On 50 samples we calculated a mean posterior coverage of 89.87\% with an IQR 88.10\% to 92.39\%. We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
+
+
+<<>>=
+load("/Users/hannahweeks/Desktop/ncov_logit.RData")
+load("/Users/hannahweeks/Desktop/ncov_probit.RData")
+load("/Users/hannahweeks/Desktop/ncov_frac.RData")
+
+ncov_logit$type <- "logit"
+ncov_probit$type <- "probit"
+ncov_frac$type <- "linear"
+
+ncov_res <- rbind(ncov_logit, ncov_probit, ncov_frac)
+# make sure column names are correct and that class == data.frame
+
+ncov_long <- reshape(ncov_res, varying = c("lower", "upper"), v.names = "ncov",
+                     timevar = "side", times = c("lower", "upper"),
+                     direction = "long")
+rownames(ncov_long) <- NULL
+ncov_long <- subset(ncov_long, select = c("ncov", "side", "type"), drop = TRUE)
+
+cbColors <- c("#009E73", "#0072B2", "#D55E00")
+
+ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
+  facet_grid(~ side) + geom_boxplot(na.rm = TRUE) +
+  scale_fill_manual(values = cbColors)
+
+ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
+  facet_grid(~ side) + geom_violin(na.rm = TRUE) +
+  scale_fill_manual(values = cbColors)
+
+
+# With lines where we would want (actual middles are closer to .05)
+ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
+  facet_grid(~ side) + geom_boxplot(na.rm = TRUE) +
+  scale_fill_manual(values = cbColors) +
+  geom_hline(yintercept = .15, linetype = 'dashed')
+
+
+ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
+  facet_grid(~ side) + geom_violin(na.rm = TRUE) +
+  scale_fill_manual(values = cbColors) +
+  geom_hline(yintercept = .025, linetype = 'dashed')
+
+@
+
 
 
 \begin{itemize}
@@ -126,6 +179,13 @@ $\beta_0$  & \\
 
 %other than comment about bibtex doc above, should be good for compilation up through this point
 
+
+\section{Package Contents}
+
+The primary function within the \texttt{pkm} package is the \texttt{pkm} function.
+
+
+
 \section{Example}
 <<>>=
 #Other packages for this demo
@@ -143,14 +203,16 @@ library(xtable)
 \end{itemize}
 
 <<>>=
-devtools::install_github("hlweeks/pkpredict")
+# devtools::install_github("hlweeks/pkpredict")
 library(pkpredict)
 @
 
+{\large note: for key functions, list the parameters that can be manipulated and what they do, default values, etc}
 
 \subsection{Sample infusion schedule and concentation data}
 package functions: \texttt{ivt\_toList}
 
+We have a vector of start times for five doses in hours since first infusion, and the duration of each dose. In this case, the duration is the same for each dose: half an hour. The rate of infusion is 6 g/h for all administered doses.
 <<>>=
 # Time in hours since first infusion
 start_times <- c(0, 8, 16, 24, 32)
@@ -172,7 +234,7 @@ print(xtable(inf_df, digits = 1, caption = "Sample Infusion Schedule"),
       caption.placement = "top", include.rownames = FALSE)
 @
 
-
+We also have sample data from three blood draws, with information on the concentration of piperacillin in the blood in $\mu$g/mL at the time at which the blood was drawn, again in hours since first infusion.
 <<>>=
 # Time is in hours since first infusion
 # Concentration is in mcg/ml (or equivalently, mg/L)
@@ -192,36 +254,44 @@ names(dat_d) <- c("time", "con")
 \subsection{MIC estimates}
 package functions: \texttt{mic_stat}
 
+
+We first obtain a prior estimate of target attainment ({\bf make sure this is defined above}) based on the infusion schedule outlined above. By default, the \texttt{mic\_stat} function calculates the $fT > 4 \times MIC$ (notation from paper Matt sent - make sure this notation is introduced above).
 <<>>=
 # Threshold is in mcg/mL (same scale as observed data)
 # By default, considering time through 12 hours after end of the final dose
 
 # Prior estimate
 prior_ft.mic <- mic_stat(ivt = ivt_d, th = 64)
-prior_ft.mic$ftmic
-# Default parameters used
-(pars <- prior_ft.mic$pars)
-
-# Posterior estimate after observed measurements
-est <- optim(pars, log_posterior, ivt = ivt_d, dat = dat_d,
-             control = list(fnscale=-1), hessian=TRUE)
-post_ft.mic <- mic_stat(ivt = ivt_d, th = 64, pars = est$par)
-post_ft.mic$ftmic
+prior_ft.mic
 @
 
-In order to get confidence intervals for these estimates, it is necessary to fit the PK model.
+This prior estimate of target attainment represents how we would expect a typical patient to respond to treatment over the course of this infusion schedule, in lieu of any blood concentration measurements. We can incorporate the observed blood draws and obtain an individualized estimate of target attainment based on the patient's data.
+
+<<>>=
+# Posterior estimate after observed measurements
+post_ft.mic <- mic_stat(ivt = ivt_d, dat = dat_d, th = 64)
+post_ft.mic
+@
+
+
 
 \subsection{PK Model}
 package functions: \texttt{pkm}
 
+Fitting the model here
 <<>>=
 pk.fit <- pkm(formula = con ~ time, data = dat_d,
               ivt = ivt_d, thres = 64)
 pk.fit$ftmic
 @
 
+We see that the MIC statistic is exactly that produced by the \texttt{mic_stat} function. Below we extract the predicted values, either directly from the model object (returns values calculated at infusion and blood draw times), or at user-specified times with the \texttt{predict.pkm} method.
+
 <<echo = FALSE, results = 'asis'>>=
 pred.df <- pk.fit$fitted.values
+# all.equal(pred.df$conc == predict(pk.fit)) # need to fix predict.pkm
+@
+<<>>=
 names(pred.df) <- c("Time Since First Infusion (h)", "Concentration (mcg/mL)", "Standard Error")
 
 xdf <- xtable(pred.df, digits = 2, caption = "Predicted Values")
