@@ -13,8 +13,14 @@ library(xtable)
 % 2. Methods
 %  - PK model (two-compartment)
 %  - PD summaries (T>MIC)
-%  - Statistical model (Bayesian NLR)
-% Quality of predictions (computing efficiency, 'coverage' of credible intervals)
+%  - Statistical model (Bayesian NLR); prior and where it comes from
+%  - Approximate intervals for MIC statistic
+%  - Evaluating quality of approximate intervals 
+%  3. Results; summary of CI quality
+%  4. Examples
+%  5. Discussion/conclusion; potential extensions 
+%  - statistical [covariates, different types of models]
+%  - applications)
 % Extensions
 % Conclusions
 
