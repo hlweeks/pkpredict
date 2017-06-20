@@ -25,6 +25,8 @@ ivt_toList <- function(begin, end = NULL, dur = NULL, rate){
   if(!is.null(end) & !is.null(dur)){
     stop('Only one of end or dur can be specified')
   }
+  # Duration should be of length 1 (common across all doses) or length(begin) (one value for each dose)
+  #INSERT CODE TO DO THIS
 
   val <- if(is.null(end)){begin + dur}else{end}
 

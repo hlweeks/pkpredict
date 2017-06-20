@@ -80,28 +80,14 @@ pkm <- function(formula, data, subset, ivt,
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
   # MIC statistic information
-  ftmic <- mic_stat(ivt = ivt, th = thres,
-                    pars = est$par, cod = cod)
-
-  # SE of MIC statistic (logit-transformed)
-  grd_mic <- fdGrad(est$par, function(pars) {
-    mic <- mic_stat(ivt = ivt, th = thres,
-                    pars = pars, timeint = timeint, cod = cod)$ftmic
-    log(mic/(1-mic)) ## constrain between 0 and 1
-  })
-  sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
-
-  # Get CI for logit transformed statistic then backtransform to original scale
-  ci_logit_mic <- log(ftmic$ftmic/(1-ftmic$ftmic)) + c(-1,1)*qnorm(1-alp/2)*sde_mic
-  ci_mic <- exp(ci_logit_mic)/(1 + exp(ci_logit_mic))
+  ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
+                    pars = pars, cod = cod)
 
   obj <- list(#"call" = match.call(),
               # Posterior estimate
               "optim" = est,
               # Prior information
               # NEED TO GET PRIOR ESTIMATES??
-              "prior" <- list("time" = tms,
-                              "conc" = xx),
 
               # Relevant data
               "infsched" = ivt,
@@ -114,10 +100,12 @@ pkm <- function(formula, data, subset, ivt,
                                            "conc" = con[1,],
                                            "se_con" = sde),
 
+              # Needed for predict method
+              "sol.eqn" = sol,
+
               # ft>mic information
               "thresh" = thres,
-              "ftmic" = list("stat" = ftmic$ftmic,
-                             "conf.int" = ci_mic)
+              "ftmic" = ftmic
               )
 
   class(obj) <- "pkm"
