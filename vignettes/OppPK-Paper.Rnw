@@ -1,10 +1,15 @@
 \documentclass{article}
 \usepackage{amsmath,underscore}
+\usepackage[margin=1in]{geometry}
 \begin{document}
 
 <<>>=
 # Other needed packages
 library(xtable)
+library(ggplot2)
+library(shiny)
+library(shinydashboard)
+library(rhandsontable)
 @
 
 
@@ -108,6 +113,9 @@ For each of the 50 sets of prior parameters and simulated data:
 On 50 samples we calculated a mean posterior coverage of 89.87\% with an IQR 88.10\% to 92.39\%. We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
 
 
+We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algprithm.
+
+
 <<>>=
 load("/Users/hannahweeks/Desktop/ncov_logit.RData")
 load("/Users/hannahweeks/Desktop/ncov_probit.RData")
@@ -127,30 +135,23 @@ rownames(ncov_long) <- NULL
 ncov_long <- subset(ncov_long, select = c("ncov", "side", "type"), drop = TRUE)
 
 cbColors <- c("#009E73", "#0072B2", "#D55E00")
+@
 
-ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
-  facet_grid(~ side) + geom_boxplot(na.rm = TRUE) +
-  scale_fill_manual(values = cbColors)
-
-ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
-  facet_grid(~ side) + geom_violin(na.rm = TRUE) +
-  scale_fill_manual(values = cbColors)
-
+\begin{figure}
+\caption{Comparison of confidence intervals for estimate of target attainment}
+<<echo = FALSE>>=
+# Boxplots or violin plots?
 
 # With lines where we would want (actual middles are closer to .05)
 ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
   facet_grid(~ side) + geom_boxplot(na.rm = TRUE) +
   scale_fill_manual(values = cbColors) +
-  geom_hline(yintercept = .15, linetype = 'dashed')
-
-
-ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
-  facet_grid(~ side) + geom_violin(na.rm = TRUE) +
-  scale_fill_manual(values = cbColors) +
-  geom_hline(yintercept = .025, linetype = 'dashed')
-
+  geom_hline(yintercept = .15, linetype = 'dashed') +
+  labs(x = "Interval Type", y = "95% Confidence Interval Tail Area") + guides(fill = FALSE)
 @
-
+\footnotesize
+Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval.
+\end{figure}
 
 
 \begin{itemize}
@@ -173,24 +174,21 @@ $\alpha_0$ & \\
 $\beta_0$  & \\
 \hline
 \end{tabular}
-\caption{Prior hyperparameters for piperacilling in a population of hospitalized, critically ill patients.}\label{tab:hyp}
+\caption{Prior hyperparameters for piperacillin in a population of hospitalized, critically ill patients.}\label{tab:hyp}
 \end{table}
 \end{center}
+
 
 %other than comment about bibtex doc above, should be good for compilation up through this point
 
 
-\section{Package Contents}
-
-The primary function within the \texttt{pkm} package is the \texttt{pkm} function.
+% \section{Package Contents}
+%
+% The primary function within the \texttt{pkm} package is the \texttt{pkm} function.
 
 
 
 \section{Example}
-<<>>=
-#Other packages for this demo
-library(xtable)
-@
 
 
 \begin{itemize}
@@ -202,7 +200,7 @@ library(xtable)
   \item shiny app demo
 \end{itemize}
 
-<<>>=
+<<message = FALSE>>=
 # devtools::install_github("hlweeks/pkpredict")
 library(pkpredict)
 @
@@ -285,13 +283,14 @@ pk.fit <- pkm(formula = con ~ time, data = dat_d,
 pk.fit$ftmic
 @
 
-We see that the MIC statistic is exactly that produced by the \texttt{mic_stat} function. Below we extract the predicted values, either directly from the model object (returns values calculated at infusion and blood draw times), or at user-specified times with the \texttt{predict.pkm} method.
+The model MIC statistic is exactly that produced by the \texttt{mic_stat} function. Below we extract the predicted values, either directly from the model object (returns values calculated at infusion and blood draw times), or at user-specified times with the \texttt{predict.pkm} method.
 
-<<echo = FALSE, results = 'asis'>>=
+<<>>=
 pred.df <- pk.fit$fitted.values
 # all.equal(pred.df$conc == predict(pk.fit)) # need to fix predict.pkm
 @
-<<>>=
+
+<<echo = F, results = 'asis'>>=
 names(pred.df) <- c("Time Since First Infusion (h)", "Concentration (mcg/mL)", "Standard Error")
 
 xdf <- xtable(pred.df, digits = 2, caption = "Predicted Values")
@@ -302,9 +301,22 @@ print(xdf, caption.placement = "top", include.rownames = FALSE)
 \subsection{Model Methods}
 package functions: \texttt{plot.pkm}, \texttt{predict.pkm}, \texttt{update.pkm}, \texttt{confint.pkm}
 
+
+\begin{figure}
 <<>>=
 plot(pk.fit)
 @
+\end{figure}
+
+\subsection{Shiny GUI}
+
+An interactive implementation of the methods presented here can be launched within the package by calling \texttt{shiny_pkm}. This function procudes a web application, created using the {\it shiny} package in R. In the application, users can enter information about a patient's infusion schedule and and concentration data collected from blood draws. By default, the application uses the infusion schedule in the example above.
+
+<<eval = F>>=
+shiny_pkm()
+@
+
+% Insert screenshots of the application
 
 
 

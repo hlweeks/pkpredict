@@ -4,9 +4,9 @@
 \alias{mic_stat}
 \title{Time Above Pharmacokinetic Threshold}
 \usage{
-mic_stat(ivt, th, pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 =
-  -7, lerr = 2.33), timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-  cod = 12)
+mic_stat(ivt, th, dat = data.frame(), pars = c(lv_1 = 3.223, lk_10 = -1.65,
+  lk_12 = -7, lk_21 = -7, lerr = 2.33), cod = 12, timeint = c(0,
+  max(sapply(ivt, function(x) x$end)) + cod), conf.level = 0.95)
 }
 \arguments{
 \item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
@@ -16,10 +16,12 @@ and rate of infusion (g/h) at each dose}
 
 \item{pars}{Vector of pharmacokinetic parameters of length 5: (log(v_1), log(k_10), log(k_12), log(k_21), log(err))}
 
-\item{timeint}{Vector with two elements indicating the start and end of the time interval over which
-the statistic is computed}
-
 \item{cod}{Length of time after end of last dose to consider}
+
+\item{timeint}{Vector with two elements indicating the start and end of the time interval over which
+the statistic is computed. By default covers the full dosing period + \code{cod}}
+
+\item{conf.level}{Desired confidence level of the interval}
 }
 \value{
 Fraction of time spent above the specified threshold from time of first dose through
@@ -27,7 +29,7 @@ Fraction of time spent above the specified threshold from time of first dose thr
 }
 \description{
 Compute an estimate of pharmacodynamic target attainment, typically defined
-to be some multiple of the minimum inhibitory concentration of the infecting microorganism
+to be some multiple of the minimum inhibitory concentration of the infecting microorganism.
 }
 \examples{
 
