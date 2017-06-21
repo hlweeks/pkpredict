@@ -7,7 +7,7 @@
 #'
 #' @param formula A formula where the left side is the measured concentration of drug
 #' and the right side is the times of concentration measurements
-#' @param dat Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
+#' @param data Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
 #' @param subset Subset of the \code{dat} data frame to use
 #' @param pars Vector of (prior) log-pharmacokinetic parameters of length 5: (lv_1, lk_10, lk_12, lk_21, lerr)
 #' @param ivt List with containing start of infusion times, end of infusion times,
