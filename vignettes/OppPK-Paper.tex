@@ -50,6 +50,7 @@
 
 \usepackage{alltt}
 \usepackage{amsmath,underscore}
+\usepackage[margin=1in]{geometry}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
@@ -58,6 +59,16 @@
 \begin{alltt}
 \hlcom{# Other needed packages}
 \hlkwd{library}\hlstd{(xtable)}
+\hlkwd{library}\hlstd{(ggplot2)}
+\hlkwd{library}\hlstd{(shiny)}
+\hlkwd{library}\hlstd{(shinydashboard)}
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'shinydashboard'}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following object is masked from 'package:graphics':\\\#\# \\\#\#\ \ \ \  box}}\begin{alltt}
+\hlkwd{library}\hlstd{(rhandsontable)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -158,7 +169,49 @@ For each of the 50 sets of prior parameters and simulated data:
 	 \item 3,000 samples from the posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm with 2,000 warm-up iterations. The proportion of the 3,000 posterior samples falling within the upper and lower bounds was used to estimate the proportion of the posterior distribution of the MIC statistic falling within the confidence interval.
 \end{itemize}
 
+%Update these numbers with 1000 simulations
+{\it replace}
 On 50 samples we calculated a mean posterior coverage of 89.87\% with an IQR 88.10\% to 92.39\%. We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
+
+
+We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algprithm.
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{load}\hlstd{(}\hlstr{"/Users/hannahweeks/Desktop/ncov_logit.RData"}\hlstd{)}
+\hlkwd{load}\hlstd{(}\hlstr{"/Users/hannahweeks/Desktop/ncov_probit.RData"}\hlstd{)}
+\hlkwd{load}\hlstd{(}\hlstr{"/Users/hannahweeks/Desktop/ncov_frac.RData"}\hlstd{)}
+
+\hlstd{ncov_logit}\hlopt{$}\hlstd{type} \hlkwb{<-} \hlstr{"logit"}
+\hlstd{ncov_probit}\hlopt{$}\hlstd{type} \hlkwb{<-} \hlstr{"probit"}
+\hlstd{ncov_frac}\hlopt{$}\hlstd{type} \hlkwb{<-} \hlstr{"linear"}
+
+\hlstd{ncov_res} \hlkwb{<-} \hlkwd{rbind}\hlstd{(ncov_logit, ncov_probit, ncov_frac)}
+\hlcom{# make sure column names are correct and that class == data.frame}
+
+\hlstd{ncov_long} \hlkwb{<-} \hlkwd{reshape}\hlstd{(ncov_res,} \hlkwc{varying} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"lower"}\hlstd{,} \hlstr{"upper"}\hlstd{),} \hlkwc{v.names} \hlstd{=} \hlstr{"ncov"}\hlstd{,}
+                     \hlkwc{timevar} \hlstd{=} \hlstr{"side"}\hlstd{,} \hlkwc{times} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"lower"}\hlstd{,} \hlstr{"upper"}\hlstd{),}
+                     \hlkwc{direction} \hlstd{=} \hlstr{"long"}\hlstd{)}
+\hlkwd{rownames}\hlstd{(ncov_long)} \hlkwb{<-} \hlkwa{NULL}
+\hlstd{ncov_long} \hlkwb{<-} \hlkwd{subset}\hlstd{(ncov_long,} \hlkwc{select} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"ncov"}\hlstd{,} \hlstr{"side"}\hlstd{,} \hlstr{"type"}\hlstd{),} \hlkwc{drop} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+
+\hlstd{cbColors} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"#009E73"}\hlstd{,} \hlstr{"#0072B2"}\hlstd{,} \hlstr{"#D55E00"}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{figure}
+\caption{Comparison of confidence intervals for estimate of target attainment}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-3-1} 
+
+\end{knitrout}
+\footnotesize
+Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval.
+\end{figure}
 
 
 \begin{itemize}
@@ -181,21 +234,21 @@ $\alpha_0$ & \\
 $\beta_0$  & \\
 \hline
 \end{tabular}
-\caption{Prior hyperparameters for piperacilling in a population of hospitalized, critically ill patients.}\label{tab:hyp}
+\caption{Prior hyperparameters for piperacillin in a population of hospitalized, critically ill patients.}\label{tab:hyp}
 \end{table}
 \end{center}
 
+
 %other than comment about bibtex doc above, should be good for compilation up through this point
 
+
+% \section{Package Contents}
+%
+% The primary function within the \texttt{pkm} package is the \texttt{pkm} function.
+
+
+
 \section{Example}
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcom{#Other packages for this demo}
-\hlkwd{library}\hlstd{(xtable)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
 
 
 \begin{itemize}
@@ -210,12 +263,10 @@ $\beta_0$  & \\
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{#  devtools::install_github("hlweeks/pkpredict")}
+\hlcom{# devtools::install_github("hlweeks/pkpredict")}
 \hlkwd{library}\hlstd{(pkpredict)}
 \end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: mvtnorm}}\end{kframe}
+\end{kframe}
 \end{knitrout}
 
 {\large note: for key functions, list the parameters that can be manipulated and what they do, default values, etc}
@@ -240,7 +291,7 @@ We have a vector of start times for five doses in hours since first infusion, an
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu May 18 14:52:47 2017
+% Wed Jun 21 07:18:17 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Infusion Schedule} 
@@ -272,7 +323,7 @@ We also have sample data from three blood draws, with information on the concent
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu May 18 14:52:47 2017
+% Wed Jun 21 07:18:17 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Data (observed from blood draws)} 
@@ -302,86 +353,136 @@ We first obtain a prior estimate of target attainment ({\bf make sure this is de
 
 \hlcom{# Prior estimate}
 \hlstd{prior_ft.mic} \hlkwb{<-} \hlkwd{mic_stat}\hlstd{(}\hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{th} \hlstd{=} \hlnum{64}\hlstd{)}
-\hlstd{prior_ft.mic}\hlopt{$}\hlstd{ftmic}
+\hlstd{prior_ft.mic}
 \end{alltt}
 \begin{verbatim}
+## $ftmic
 ## [1] 0.4782617
-\end{verbatim}
-\begin{alltt}
-\hlcom{# Default parameters used}
-\hlstd{(pars} \hlkwb{<-} \hlstd{prior_ft.mic}\hlopt{$}\hlstd{pars)}
-\end{alltt}
-\begin{verbatim}
-##   lv_1  lk_10  lk_12  lk_21   lerr 
-##  3.223 -1.650 -7.000 -7.000  2.330
+## 
+## $conf.int
+## [1] 0.09186105 0.89255457
+## 
+## attr(,"class")
+## [1] "mic"  "list"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-Out prior estimate for target attainment indicates that on average, a patient on the specified infusion schedule will
-({\bf does the prior indicate the response of an average patient or average response across a variety of patients?})
+This prior estimate of target attainment represents how we would expect a typical patient to respond to treatment over the course of this infusion schedule, in lieu of any blood concentration measurements. We can incorporate the observed blood draws and obtain an individualized estimate of target attainment based on the patient's data.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# Posterior estimate after observed measurements}
-\hlstd{est} \hlkwb{<-} \hlkwd{optim}\hlstd{(pars, log_posterior,} \hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{dat} \hlstd{= dat_d,}
-             \hlkwc{control} \hlstd{=} \hlkwd{list}\hlstd{(}\hlkwc{fnscale}\hlstd{=}\hlopt{-}\hlnum{1}\hlstd{),} \hlkwc{hessian}\hlstd{=}\hlnum{TRUE}\hlstd{)}
-\hlstd{post_ft.mic} \hlkwb{<-} \hlkwd{mic_stat}\hlstd{(}\hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{th} \hlstd{=} \hlnum{64}\hlstd{,} \hlkwc{pars} \hlstd{= est}\hlopt{$}\hlstd{par)}
-\hlstd{post_ft.mic}\hlopt{$}\hlstd{ftmic}
+\hlstd{post_ft.mic} \hlkwb{<-} \hlkwd{mic_stat}\hlstd{(}\hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{dat} \hlstd{= dat_d,} \hlkwc{th} \hlstd{=} \hlnum{64}\hlstd{)}
+\hlstd{post_ft.mic}
 \end{alltt}
 \begin{verbatim}
+## $ftmic
 ## [1] 0.7352296
+## 
+## $conf.int
+## [1] 0.4755578 0.8947764
+## 
+## attr(,"class")
+## [1] "mic"  "list"
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-In order to get confidence intervals for these estimates, it is necessary to fit the PK model.
+
 
 \subsection{PK Model}
 package functions: \texttt{pkm}
 
+Fitting the model here
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{pk.fit} \hlkwb{<-} \hlkwd{pkm}\hlstd{(}\hlkwc{formula} \hlstd{= con} \hlopt{~} \hlstd{time,} \hlkwc{data} \hlstd{= dat_d,}
               \hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{thres} \hlstd{=} \hlnum{64}\hlstd{)}
-\end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in pkm(formula = con \textasciitilde{} time, data = dat\_d, ivt = ivt\_d, thres = 64): object 'xx' not found}}\begin{alltt}
 \hlstd{pk.fit}\hlopt{$}\hlstd{ftmic}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'pk.fit' not found}}\end{kframe}
+\begin{verbatim}
+## $ftmic
+## [1] 0.7352296
+## 
+## $conf.int
+## [1] 0.4755578 0.8947764
+## 
+## attr(,"class")
+## [1] "mic"  "list"
+\end{verbatim}
+\end{kframe}
 \end{knitrout}
 
-\begin{kframe}
+The model MIC statistic is exactly that produced by the \texttt{mic_stat} function. Below we extract the predicted values, either directly from the model object (returns values calculated at infusion and blood draw times), or at user-specified times with the \texttt{predict.pkm} method.
 
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{pred.df} \hlkwb{<-} \hlstd{pk.fit}\hlopt{$}\hlstd{fitted.values}
+\hlcom{# all.equal(pred.df$conc == predict(pk.fit)) # need to fix predict.pkm}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'pk.fit' not found}}
+% latex table generated in R 3.3.3 by xtable 1.8-2 package
+% Wed Jun 21 07:18:20 2017
+\begin{table}[ht]
+\centering
+\caption{Predicted Values} 
+\begin{tabular}{ccc}
+  \hline
+Time Since First Infusion (h) & Concentration (mcg/mL) & Standard Error \\ 
+  \hline
+0.00 & 0.20 & 0.11 \\ 
+  0.50 & 97.34 & 0.11 \\ 
+  1.00 & 91.58 & 0.10 \\ 
+  4.00 & 63.51 & 0.08 \\ 
+  8.00 & 38.99 & 0.10 \\ 
+  8.50 & 134.03 & 0.09 \\ 
+  16.00 & 53.68 & 0.13 \\ 
+  16.50 & 147.85 & 0.08 \\ 
+  24.00 & 59.22 & 0.14 \\ 
+  24.50 & 153.07 & 0.08 \\ 
+  32.00 & 61.32 & 0.15 \\ 
+  32.50 & 155.03 & 0.08 \\ 
+  40.00 & 62.11 & 0.16 \\ 
+   \hline
+\end{tabular}
+\end{table}
 
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in names(pred.df) <- c("{}Time Since First Infusion (h)"{}, "{}Concentration (mcg/mL)"{}, : object 'pred.df' not found}}
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in xtable(pred.df, digits = 2, caption = "{}Predicted Values"{}): object 'pred.df' not found}}
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in align(xdf) <- rep("{}c"{}, 4): object 'xdf' not found}}
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in print(xdf, caption.placement = "{}top"{}, include.rownames = FALSE): object 'xdf' not found}}\end{kframe}
 
 \subsection{Model Methods}
 package functions: \texttt{plot.pkm}, \texttt{predict.pkm}, \texttt{update.pkm}, \texttt{confint.pkm}
 
+
+\begin{figure}
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{plot}\hlstd{(pk.fit)}
 \end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-14-1} 
 
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in plot(pk.fit): object 'pk.fit' not found}}\end{kframe}
 \end{knitrout}
+\end{figure}
+
+\subsection{Shiny GUI}
+
+An interactive implementation of the methods presented here can be launched within the package by calling \texttt{shiny_pkm}. This function procudes a web application, created using the {\it shiny} package in R. In the application, users can enter information about a patient's infusion schedule and and concentration data collected from blood draws. By default, the application uses the infusion schedule in the example above.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{shiny_pkm}\hlstd{()}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+% Insert screenshots of the application
 
 
 

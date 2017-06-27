@@ -4,13 +4,15 @@
 \alias{predict.pkm}
 \title{Predict method for PK model}
 \usage{
-\method{predict}{pkm}(object, newivt)
+\method{predict}{pkm}(object, times)
 }
 \arguments{
 \item{object}{Object of class "pkm"}
 
-\item{newivt}{List with containing start of infusion times, end of infusion times,
-and rate of infusion at each dose for which predictions will be obtained}
+\item{times}{Times at which predictions of blood concentration measurements are desired}
+}
+\value{
+Predicted blood concentration measurements
 }
 \description{
 Predict method for PK model
