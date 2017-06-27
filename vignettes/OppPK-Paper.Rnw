@@ -29,21 +29,26 @@ library(rhandsontable)
 % Extensions
 % Conclusions
 
-\section{Introduction}
-\begin{itemize}
-\item Goal is to facilitate real-time herapeutic drug monitoring (TDM); translational research.
-\item PK predictions often not reported with uncertainty; cite literature.
-\item Need to quantify uncertianty in real time, but it's difficult.
-\item incorporate objective prior information
-\item We created a web app and suite of methods that accomplish this.
-\end{itemize}
+%\section{Introduction}
+%\begin{itemize}
+%\item Goal is to facilitate real-time herapeutic drug monitoring (TDM); translational research.
+%\item PK predictions often not reported with uncertainty; cite literature.
+%\item Need to quantify uncertianty in real time, but it's difficult.
+%\item incorporate objective prior information
+%\item We created a web app and suite of methods that accomplish this.
+%\end{itemize}
 
-[need references]
-Adverse consequences can arise from both antibiotic underdosing and overdosing  of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat the infection. In the latter, an overabundance of antibiotic often increases neurotoxicity risks and length of stay. In another study [cite], we showed roughly 20\% of ICU patients being treated for sepsis were underdosed, while about 15\% were overdosed.  Variation in patient complications, such as multiple failing organs, can influence the dosing [and metabolism?] of an antibiotic. Simple dosing strategies (e.g. based on creatinine, alone) are unable to accurately capture the ideal amount of an antibiotic required for safe and effective treatment since individual pharmacokinetic heterogeneity varies greatly between patients.\\
+%[need references]
+Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as ciprofloxacin and piperacillin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure) \cite{Shotwell2015, Shotwell2016}. As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
 
-The proposed statistical methodology and tools are designed to estimate how an individual is responding to treatment as measured by the concentration of antibiotic in the blood over time, predict how that individual will continue to respond, and determine how treatment can be adapted to reduce the risk of adverse outcomes.  The goal is to design an effective procedure of therapeutic drug monitoring (TDM) to perform this assessment accurately and in real time. Dosing for a patient needs to be enough that the concentration in the blood remains above the necessary threshold for suppression of the offending microorganism (usually a multiple of the minimum inhibitory concentration), yet not so high as to increase the risk of adverse side effects.\\
+For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug consentration in the blood over time. These data can be used to estimate current an past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurments of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\ 
 
-Furthermore, predictions of pharmacokinetic performance often fail to provide estimates of uncertainty [cite literature]. We implement Bayesian methods using pharmacokinetic data from a prior study [cite] to provide posterior estimates of individual  target attainment, measured as the fraction of the dosing period spent above the necessary blood concentration threshold. The fact that patients tend to vary widely in their response to treatment indicates that measures of uncertainty are critical to understanding response to treatment at both the population and patient-specific level. In order for the implementation of such procedures to be truly beneficial to individuals, it is necessary to have a method of assessing and predicting patient response in real time. This introduces the issue of selecting a statistical approximation technique that is both accurate in its quantification of uncertainty while also being computationally feasible to implement via a web application. Our statistical methodology is paired with a web application that implements these techniques and makes them accessible to, for example, a physician in real time. Assessments of the performance and computational efficiency are presented for various approximation methods.
+We implement Bayesian methods using pharmacokinetic data from a prior study [cite] to provide posterior estimates of individual  target attainment, measured as the fraction of the dosing period spent above the necessary blood concentration threshold. The fact that patients tend to vary widely in their response to treatment indicates that measures of uncertainty are critical to understanding response to treatment at both the population and patient-specific level. In order for the implementation of such procedures to be truly beneficial to individuals, it is necessary to have a method of assessing and predicting patient response in real time. This introduces the issue of selecting a statistical approximation technique that is both accurate in its quantification of uncertainty while also being computationally feasible to implement via a web application. Our statistical methodology is paired with a web application that implements these techniques and makes them accessible to, for example, a physician in real time. Assessments of the performance and computational efficiency are presented for various approximation methods.
+
+% [MSS note: I think this need to be in the last paragraph of the introduction] The aim of this work is to facilitate accurate, real-time therapeutic drug monitoring (TDM).
+
+% [MSS note: I think this text belongs in the methods] Dosing for a patient needs to be enough that the concentration in the blood remains above the necessary threshold for suppression of the offending microorganism (usually a multiple of the minimum inhibitory concentration), yet not so high as to increase the risk of adverse side effects.\\
+
 
 \section{Methods}
 \subsection{Two-compartment model}
@@ -116,22 +121,22 @@ For each of the 50 sets of prior parameters and simulated data:
 
 %Update these numbers with 1000 simulations
 {\it replace}
-On 50 samples we calculated a mean posterior coverage of 89.87\% with an IQR 88.10\% to 92.39\%. We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
+	On 50 samples we calculated a mean posterior coverage of 89.87\% with an IQR 88.10\% to 92.39\%. We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
 
 
-We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algprithm.
+	We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algprithm.
 
 
-<<>>=
-load("/Users/hannahweeks/Desktop/ncov_logit.RData")
-load("/Users/hannahweeks/Desktop/ncov_probit.RData")
-load("/Users/hannahweeks/Desktop/ncov_frac.RData")
+	<<>>=
+	load("/Users/hannahweeks/Desktop/ncov_logit.RData")
+	load("/Users/hannahweeks/Desktop/ncov_probit.RData")
+	load("/Users/hannahweeks/Desktop/ncov_frac.RData")
 
-ncov_logit$type <- "logit"
-ncov_probit$type <- "probit"
-ncov_frac$type <- "linear"
+	ncov_logit$type <- "logit"
+	ncov_probit$type <- "probit"
+	ncov_frac$type <- "linear"
 
-ncov_res <- rbind(ncov_logit, ncov_probit, ncov_frac)
+	ncov_res <- rbind(ncov_logit, ncov_probit, ncov_frac)
 # make sure column names are correct and that class == data.frame
 
 ncov_long <- reshape(ncov_res, varying = c("lower", "upper"), v.names = "ncov",
