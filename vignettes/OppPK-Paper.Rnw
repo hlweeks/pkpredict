@@ -20,10 +20,10 @@ library(rhandsontable)
 %  - PD summaries (T>MIC)
 %  - Statistical model (Bayesian NLR); prior and where it comes from
 %  - Approximate intervals for MIC statistic
-%  - Evaluating quality of approximate intervals 
+%  - Evaluating quality of approximate intervals
 %  3. Results; summary of CI quality
 %  4. Examples
-%  5. Discussion/conclusion; potential extensions 
+%  5. Discussion/conclusion; potential extensions
 %  - statistical [covariates, different types of models]
 %  - applications)
 % Extensions
@@ -41,7 +41,7 @@ library(rhandsontable)
 %[need references]
 Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as ciprofloxacin and piperacillin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure) \cite{Shotwell2015, Shotwell2016}. As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
 
-For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug consentration in the blood over time. These data can be used to estimate current an past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurments of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\ 
+For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug consentration in the blood over time. These data can be used to estimate current an past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurments of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
 
 We implement Bayesian methods using pharmacokinetic data from a prior study [cite] to provide posterior estimates of individual  target attainment, measured as the fraction of the dosing period spent above the necessary blood concentration threshold. The fact that patients tend to vary widely in their response to treatment indicates that measures of uncertainty are critical to understanding response to treatment at both the population and patient-specific level. In order for the implementation of such procedures to be truly beneficial to individuals, it is necessary to have a method of assessing and predicting patient response in real time. This introduces the issue of selecting a statistical approximation technique that is both accurate in its quantification of uncertainty while also being computationally feasible to implement via a web application. Our statistical methodology is paired with a web application that implements these techniques and makes them accessible to, for example, a physician in real time. Assessments of the performance and computational efficiency are presented for various approximation methods.
 
@@ -107,7 +107,8 @@ h(\log \theta_i) \sim N(h(\log \hat{\theta_i}), G^T[-H]^{-1}G).
 \end{displaymath}
 \noindent An approximate $(1-\alpha)\cdot 100$\% credible interval for $h(\log \theta_i)$ is thus given by the $\alpha/2$ and $(1-\alpha)/2$ quantiles of the approximate posterior distribution for $h(\log \theta)$. This method is computationally elegant, since the posterior Hessian and posterior mode can be computed simultaneously by most optimization software routines (e.g., the R function `optim'). Indeed, this method usually has the smallest computational burden (i.e., number of likelihood evaluations) among the three methods considered here.
 
-\subsection{Evaluation of approximation method}
+	We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algorithm.
+
 The posterior coverage of the MIC statistic 95\% confidence interval was estimated as follows:
 
 50 samples were drawn from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the first 4 PK parameters and the standard error term corresponding to the 5th prior parameter. All observations were simulated during the final (5th) dosing period at 32, 32.5, 33, 34, 36, and 38 hours.
@@ -119,18 +120,32 @@ For each of the 50 sets of prior parameters and simulated data:
 	 \item 3,000 samples from the posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm with 2,000 warm-up iterations. The proportion of the 3,000 posterior samples falling within the upper and lower bounds was used to estimate the proportion of the posterior distribution of the MIC statistic falling within the confidence interval.
 \end{itemize}
 
+\subsection{Evaluation of approximation method}
+<<>>=
+load("/Users/hannahweeks/Desktop/all_cov.rdta")
+
+# Median (IQR) for each
+miqr <- purrr::partial(quantile, probs = c(.25, .5, .75), na.rm = T)
+
+miqr_logit <- miqr(coverage_res$coverage_logit)
+miqr_probit <- miqr(coverage_res$coverage_probit)
+miqr_frac <- miqr(coverage_res$coverage_frac)
+
+spf <- purrr::partial(sprintf, fmt = "%.1f")
+@
+
+
 %Update these numbers with 1000 simulations
 {\it replace}
-	On 50 samples we calculated a mean posterior coverage of 89.87\% with an IQR 88.10\% to 92.39\%. We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
+	On 1,000 samples we calculated a median posterior coverage of `r spf(miqr_frac[2]*100)`\% with an IQR `r spf(miqr_frac[1]*100)`\% to `r spf(miqr_frac[3]*100)`\%.
+	%We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$.
 
+Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
+For the logit-transformed interval, the Bayesian coverage had a median (IQR) of `r spf(miqr_logit[2]*100)`\% (`r spf(miqr_logit[1]*100)`\%, `r spf(miqr_logit[3]*100)`\%) and the probit-transformed interval had `r spf(miqr_probit[2]*100)`\% (`r spf(miqr_probit[1]*100)`\%, `r spf(miqr_probit[3]*100)`\%)
 
-	We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algprithm.
 
 
 	<<>>=
-	load("/Users/hannahweeks/Desktop/ncov_logit.RData")
-	load("/Users/hannahweeks/Desktop/ncov_probit.RData")
-	load("/Users/hannahweeks/Desktop/ncov_frac.RData")
 
 	ncov_logit$type <- "logit"
 	ncov_probit$type <- "probit"
@@ -163,6 +178,8 @@ ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
 \footnotesize
 Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval.
 \end{figure}
+
+% Should comment on the ones that are equal to 1
 
 
 \begin{itemize}
