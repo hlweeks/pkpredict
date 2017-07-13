@@ -74,8 +74,12 @@ $v_1$  & L & Volume of central compartment\\
 \caption{Two-compartment model parameter units (SI) and descriptions. \label{tab:pkpars}}
 \end{table}
 
-\subsection{Bayes prediction model}
-Concentration measurements are modeled using a nonlinear regression method with either additive error as follows:
+
+% introduce the time above MIC statistic and how we calculate/approximate it based on the intersection of the curve with the MIC.
+% check if uniroot is a bisection method of finding the root - if not bisection, then identify what method it's using
+
+\subsection{Bayes prediction model} % statistical model
+Concentration measurements are modeled using a nonlinear regression method with additive error as follows:
 \begin{displaymath}
 c_{ij} = \eta_i(t_{ij}, \theta_i) + \epsilon_{ij}
 \end{displaymath}
@@ -92,7 +96,9 @@ In the current context, $f$ is taken as the normal density function with mean ze
 \end{align}
 \noindent where $N_4(\mu_0, \Sigma_0)$ represents the 4-variate normal distribution with mean $\mu_0$ and covariance matrix $\Sigma_0$, and $N_1(m_0, s_0)$ represents the univariate normal distribution with mean $m_0$ and variance $s_0$. The prior distribution for the PK parameters represents our prior knowledge about the PK heterogeneity for a particular drug in a target population. Thus, the values of the prior hyperparameters should be carefully selected for the task at hand. In the current context, and by default, the hyperparameters are specified to correspond with estimates that arose from a study of piperacillin pharmacokinetics in a hospitalized, critically ill population. The particular values are listed in an appendix.
 
-Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for a specific summary of the curve: the length of time in which the concentration exceeds a specified value. Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic. We consider several methods as described in the following sections.
+Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for a specific summary of the curve: the length of time in which the concentration exceeds a specified value. Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic. We consider several methods as described in the following sections. [REWORD THIS LAST SENTENCE - all one method, just looking at different types of intervals]
+
+% mention that here we are looking for the posterior of that specific statistic (ftmic)
 
 \subsubsection{Laplace approximation}
 We first considered a method that makes use of two approximations. The first is a Laplace approximation to the subject-specific posterior density, and the second is a first order Taylor approximation of the target summary (i.e., the `delta method'). The Laplace approximation is given as follows
@@ -107,11 +113,13 @@ h(\log \theta_i) \sim N(h(\log \hat{\theta_i}), G^T[-H]^{-1}G).
 \end{displaymath}
 \noindent An approximate $(1-\alpha)\cdot 100$\% credible interval for $h(\log \theta_i)$ is thus given by the $\alpha/2$ and $(1-\alpha)/2$ quantiles of the approximate posterior distribution for $h(\log \theta)$. This method is computationally elegant, since the posterior Hessian and posterior mode can be computed simultaneously by most optimization software routines (e.g., the R function `optim'). Indeed, this method usually has the smallest computational burden (i.e., number of likelihood evaluations) among the three methods considered here.
 
+\subsection{Evaluation of approximation method}
+
 	We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algorithm.
 
 The posterior coverage of the MIC statistic 95\% confidence interval was estimated as follows:
 
-50 samples were drawn from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the first 4 PK parameters and the standard error term corresponding to the 5th prior parameter. All observations were simulated during the final (5th) dosing period at 32, 32.5, 33, 34, 36, and 38 hours.
+One thousand samples were drawn from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the first 4 PK parameters and the standard error term corresponding to the 5th prior parameter. All observations were simulated during the final (5th) dosing period at 32, 32.5, 33, 34, 36, and 38 hours.
 
 For each of the 50 sets of prior parameters and simulated data:
 
@@ -119,6 +127,8 @@ For each of the 50 sets of prior parameters and simulated data:
 	 \item A Laplace approximation to the posterior density was calculated and the delta method used to estimate the standard errors of the MIC statistic. A 95\% asymptotic normal confidence interval was used with the delta method standard errors to estimate upper and lower bounds.
 	 \item 3,000 samples from the posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm with 2,000 warm-up iterations. The proportion of the 3,000 posterior samples falling within the upper and lower bounds was used to estimate the proportion of the posterior distribution of the MIC statistic falling within the confidence interval.
 \end{itemize}
+
+\section{Results}
 
 \subsection{Evaluation of approximation method}
 <<>>=
@@ -172,7 +182,7 @@ cbColors <- c("#009E73", "#0072B2", "#D55E00")
 ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
   facet_grid(~ side) + geom_boxplot(na.rm = TRUE) +
   scale_fill_manual(values = cbColors) +
-  geom_hline(yintercept = .15, linetype = 'dashed') +
+  geom_hline(yintercept = .025, linetype = 'dashed') +
   labs(x = "Interval Type", y = "95% Confidence Interval Tail Area") + guides(fill = FALSE)
 @
 \footnotesize
@@ -181,30 +191,16 @@ Plotted values represent the ``non-coverage'' in each tail region outside the 95
 
 % Should comment on the ones that are equal to 1
 
-
+% Other things to include in results
 \begin{itemize}
 \item used MCMC as gold-standard
 \item quantified posterior probability contained within approximate intervals for $logit^{-1}(h(log \theta_i))$
-\item quantified number of posterior evaluations
-\item quantified computing time
+\item quantified number of posterior evaluations % X
+\item quantified computing time % give brief summary how long it takes on average to compute each interval using sampling or approx
 \item note: make sure to uncomment line below and set up the bibtex doc
 %\item use ``plasmode'' simulation to assess quality of method across variety of individuals (PK heterogeneity in this pop); recent example of plasmode use in \cite{Franklin2014}; pioneered by \cite{Vaughan2009} % make sure this line runs - might be an issue w/ configuring bibtex document
 \end{itemize}
 
-\section{Appendix: Prior hyperparameters for piperacillin among critically ill}
-\begin{center}
-\begin{table}
-\begin{tabular}{lll} \hline
-Parameter & Value \\ \hline
-$\mu_0$ & \\
-$\Sigma_0$ & \\
-$\alpha_0$ & \\
-$\beta_0$  & \\
-\hline
-\end{tabular}
-\caption{Prior hyperparameters for piperacillin in a population of hospitalized, critically ill patients.}\label{tab:hyp}
-\end{table}
-\end{center}
 
 
 %other than comment about bibtex doc above, should be good for compilation up through this point
@@ -217,7 +213,6 @@ $\beta_0$  & \\
 
 
 \section{Example}
-
 
 \begin{itemize}
   \item Generate ivt data frame
@@ -346,6 +341,37 @@ shiny_pkm()
 
 % Insert screenshots of the application
 
+
+\section{Discussion}
+
+\begin{itemize}
+
+  \item Recommendation about how to use this software: tinkering to get an idea of how patient is responding. After tinkering should do final round of MCMC sampling for most accurate estimates
+  \item How it might be used in clinical settings
+  \item Future directions
+  \item How to modify the functions to adapt to other drugs
+  \item extension to 3 compartment model or nonlinear kinetics (?)
+  \item clincal complications - maybe get Bill's input on how to address the fact that we are dealing with AKI patients and piperacillin is partially renally excreted (caution of using this methodology)
+
+\end{itemize}
+
+
+% write some stuff here
+
+\section{Appendix: Prior hyperparameters for piperacillin among critically ill}
+\begin{center}
+\begin{table}
+\begin{tabular}{lll} \hline
+Parameter & Value \\ \hline
+$\mu_0$ & \\
+$\Sigma_0$ & \\
+$\alpha_0$ & \\
+$\beta_0$  & \\
+\hline
+\end{tabular}
+\caption{Prior hyperparameters for piperacillin in a population of hospitalized, critically ill patients.}\label{tab:hyp}
+\end{table}
+\end{center}
 
 
 \end{document}
