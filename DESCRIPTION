@@ -5,7 +5,7 @@ Authors@R: c(person("Matthew", "Shotwell", email = "matt.shotwell@vanderbilt.edu
              person("Hannah", "Weeks", email = "hannah.weeks@vanderbilt.edu", role = c("aut", "cre")))
 Description: Contains functions to perform analyses associated with pharmacokinetic modeling. 
  (Further explanation required) 
-Depends: R (>= 3.3.2), mvtnorm
+Depends: R (>= 3.3.2), mvtnorm, shiny, shinydashboard
 Imports: stats, graphics
 URL: https://github.com/hlweeks/pkpredict
 License: GPL-3
