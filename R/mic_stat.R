@@ -24,7 +24,8 @@
 
 mic_stat <- function(ivt, th, dat = data.frame(),
                      pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
-                     cod = 12, timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod), conf.level = .95){
+                     cod = 12, timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
+                     conf.level = .95, mcmc = FALSE){
 
   # Times required for computations
   tms <- sapply(ivt, function(x) c(x$begin, x$end))
@@ -102,20 +103,29 @@ mic_stat <- function(ivt, th, dat = data.frame(),
   # Confidence interval
   alp <- 1 - conf.level
 
-  # SE of logit(statistic)
-  grd_mic <- fdGrad(est$par, function(p) {
-    #try extracting the est object and going direct to the time>mic computation?
-    #the optim function might be what's making this take a few seconds to run
-    #the optim function is the difference between bayes.R and this
-    mic <- get_stat(pkpars = p)
-    log(mic/(1-mic)) ## constrain between 0 and 1
-  })
+  ci_mic <- c(0,0)
+  if(mcmc){
+    Sigma0 = solve(-est$hessian)
+    theta_samples <- metro_iterate(nreps = 5000, theta0 = pars,
+                                    ivt = ivt, dat = dat, Sigma = Sigma0)[[1]][2000:5000,]
 
-  sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
+    mic_samples <- apply(theta_samples, MARGIN = 1, get_stat)
 
-  # Get CI for logit transformed statistic then backtransform to original scale
-  ci_logit_mic <- log(stat/(1-stat)) + c(-1,1)*qnorm(1-alp/2)*sde_mic
-  ci_mic <- exp(ci_logit_mic)/(1 + exp(ci_logit_mic))
+    ci_mic <- quantile(mic_samples, probs = c(alp/2, 1 - (alp/2)))
+  }else{
+
+    # SE of logit(statistic) using laplace approximation
+    grd_mic <- fdGrad(est$par, function(p) {
+      mic <- get_stat(pkpars = p)
+      log(mic/(1-mic)) ## constrain between 0 and 1
+    })
+
+    sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
+
+    # Get CI for logit transformed statistic then backtransform to original scale
+    ci_logit_mic <- log(stat/(1-stat)) + c(-1,1)*qnorm(1-alp/2)*sde_mic
+    ci_mic <- exp(ci_logit_mic)/(1 + exp(ci_logit_mic))
+  }
 
   # Use time spent above threshold to compute proportion
   ftmic <- list("ftmic" = stat,
