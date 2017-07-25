@@ -64,7 +64,7 @@ shiny_pkm <- function(){
       ),
 
       HTML('<br/>'),
-      checkboxInput("MCMC", "Estimate fraction of time above threshold statistic using Markov chain Monte Carlo sampling of the posterior distribution.",
+      checkboxInput("MCMC", "Compute credible interval for fraction of time above threshold statistic using Markov chain Monte Carlo sampling of the posterior distribution.",
                     width = "200%"),
       actionButton("goPlot", "Update Plot", style = 'padding: 10px; font-size: 20px'),
       HTML('<br/><br/>'),
