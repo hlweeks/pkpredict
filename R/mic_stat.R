@@ -12,6 +12,7 @@
 #' the statistic is computed. By default covers the full dosing period + \code{cod}
 #' @param cod Length of time after end of last dose to consider
 #' @param conf.level Desired confidence level of the interval
+#' @param mcmc logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)
 #'
 #' @return Fraction of time spent above the specified threshold from time of first dose through
 #' \code{cod} hours after end of the last dose
@@ -25,7 +26,7 @@
 mic_stat <- function(ivt, th, dat = data.frame(),
                      pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                      cod = 12, timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-                     conf.level = .95, mcmc = FALSE){
+                     conf.level = .95, mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL){
 
   # Times required for computations
   tms <- sapply(ivt, function(x) c(x$begin, x$end))
@@ -105,9 +106,12 @@ mic_stat <- function(ivt, th, dat = data.frame(),
 
   ci_mic <- c(0,0)
   if(mcmc){
+    # For reproducibility of sampling
+    set.seed(seed)
+
     Sigma0 = solve(-est$hessian)
-    theta_samples <- metro_iterate(nreps = 5000, theta0 = pars,
-                                    ivt = ivt, dat = dat, Sigma = Sigma0)[[1]][2000:5000,]
+    theta_samples <- metro_iterate(nreps = nreps, theta0 = pars,
+                                    ivt = ivt, dat = dat, Sigma = Sigma0)[[1]][nburnin:nreps,]
 
     mic_samples <- apply(theta_samples, MARGIN = 1, get_stat)
 
@@ -129,7 +133,8 @@ mic_stat <- function(ivt, th, dat = data.frame(),
 
   # Use time spent above threshold to compute proportion
   ftmic <- list("ftmic" = stat,
-                "conf.int" = ci_mic)
+                "conf.int" = ci_mic,
+                "mcmc" = mcmc)
 
   class(ftmic) <- c("mic", class(ftmic))
 

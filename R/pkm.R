@@ -15,6 +15,8 @@
 #' @param alp Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands
 #' @param cod Length of time after end of last dose to consider
 #' @param thres Threshold for effective treatment (mcg/ml)
+#' @param mcmc logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)
+#'
 #'
 #' @details Measurements must be entered in particular units: mcg/ml for concentrations, g/h in rate of
 #' infusion, hours for times.
@@ -29,7 +31,8 @@
 pkm <- function(formula, data, subset, ivt,
                 pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                 alp=0.05, cod=12, thres=64,
-                timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod), ...) {
+                timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
+                mcmc = FALSE, ...) {
 
   # Allows formula, data, and subset to be optional (for prior only)
   mc <- match.call(expand.dots = FALSE)
@@ -81,7 +84,7 @@ pkm <- function(formula, data, subset, ivt,
 
   # MIC statistic information
   ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
-                    pars = pars, cod = cod)
+                    pars = pars, cod = cod, mcmc = mcmc)
 
   obj <- list(#"call" = match.call(),
               # Posterior estimate

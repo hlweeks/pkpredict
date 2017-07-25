@@ -6,8 +6,6 @@
 #' @return
 #' Launches an interaction interface for implementing Bayesian pharmacokinetic modeling
 #'
-#' Verify there aren't any problems running this - might need to import shiny, shinydashboard, and rhandsontable libraries
-#'
 #' @export
 #'
 #' @examples
@@ -24,8 +22,9 @@ shiny_pkm <- function(){
     ),
     dashboardSidebar(
       width = 250,
-      tags$head(tags$style(".wrapper {overflow: visible !important;}",
-                           HTML(".sidebar { width: 240px; margin-left: 5px; }"))),
+      tags$head(tags$style(HTML(".wrapper {overflow: visible !important;}"),
+                           HTML(".sidebar { width: 240px; font-size: 18px;  margin-left: 5px; }"),
+                           HTML(".main-header .logo { font-size: 30px; }"))),
       hr(),
       p("This application is designed to provide individualized estimates of drug exposure for
         critically ill patients with sepsis that have received one or more doses of piperacillin."),
@@ -46,29 +45,36 @@ shiny_pkm <- function(){
 
       ),
     dashboardBody(
+      tags$head(tags$style(HTML("#thres { font-size: 20px; height: 150%; }"),
+                           HTML("#dosing { font-size: 20px; }"),
+                           HTML("#sample { font-size: 20px; }"))),
+      tags$style(type = "text/css", "label { font-size: 18px; }"),
+
       h3("Piperacillin Therapeutic Drug Monitoring"),
 
       fluidRow(
         column(width = 6,
-               h4("Infusion Schedule"),
+               h4("Infusion Schedule", style = "font-size: 20px;"),
                rHandsontableOutput("dosing")
         ),
         column(width = 6,
-               h4("Concentration Data"),
+               h4("Concentration Data", style = "font-size: 20px;"),
                rHandsontableOutput("sample")
         )
       ),
 
       HTML('<br/>'),
-      actionButton("goPlot", "Update Plot"),
+      checkboxInput("MCMC", "Estimate fraction of time above threshold statistic using Markov-Chain Monte Carlo sampling of the posterior distribution.",
+                    width = "200%"),
+      actionButton("goPlot", "Update Plot", style = 'padding: 10px; font-size: 20px'),
       HTML('<br/><br/>'),
 
-      numericInput('thres', "Threshold (μg/ml)", value = 64, min = 0, width = '100px'),
+      numericInput('thres', "Threshold (μg/ml)", value = 64, min = 0, width = '175px'),
       em("Threshold value is typically some multiple of the minimum inhibitory concentration
-         (MIC) for the target microorganism."),
+         (MIC) for the target microorganism.", style = "font-size: 18px;"),
       HTML('<br/><br/>'),
       em("'fT > threshold' in the plot legend provides an estimate of the fraction of time
-         spent above the specified threshold."),
+         spent above the specified threshold.", style = "font-size: 18px;"),
 
       plotOutput("plot", hover = "plot_hover"),
       verbatimTextOutput("info"),
@@ -86,9 +92,7 @@ shiny_pkm <- function(){
   # Define server logic required to draw plot
   server <- function(input, output) {
     # App title with line break
-    output$titleText <- renderUI({
-      HTML("Piperacillin Therapeutic Drug Monitoring")
-    })
+    output$titleText <- renderUI(HTML("Piperacillin Therapeutic Drug Monitoring"))
 
 
     #rhandsontable for dosing information
@@ -102,7 +106,8 @@ shiny_pkm <- function(){
         }else{
           doseDF <- hot_to_r(input$dosing)
         }
-        rhandsontable(doseDF, colWidths = c(65,85,70))
+        rhandsontable(doseDF, colWidths = c(85,115,100), rowHeights = rep(30, 10),
+                      colHeaders = c("Start (h)", "Duration (h)", "Rate (g/h)"))
       }else{
         comPat <- hot_to_r(input$dosing)
         nDose <- as.numeric(input$num)
@@ -116,7 +121,8 @@ shiny_pkm <- function(){
           comPat[(input$num + 1):10,] <- matrix(0, ncol = 3, nrow = 10 - input$num)
         }
 
-        rhandsontable(comPat, colWidths = c(65,85,70))
+        rhandsontable(comPat, colWidths = c(85,115,100), rowHeights = rep(30, 10),
+                      colHeaders = c("Start (h)", "Duration (h)", "Rate (g/h)"))
       }
     })
 
@@ -126,7 +132,8 @@ shiny_pkm <- function(){
       sampDF = data.frame("Time (h)" = vec,
                           "Conc. (μg/ml)" = vec,
                           check.names=FALSE)
-      rhandsontable(sampDF, colWidths = c(65,100))
+      rhandsontable(sampDF, colWidths = c(95, 135), rowHeights = rep(30, 10),
+                    colHeaders = c("Time (h)", "Conc. (μg/ml)"))
     })
 
 
@@ -158,8 +165,7 @@ shiny_pkm <- function(){
                         list(begin=24.0, end=24.5, k_R=6),
                         list(begin=32.0, end=32.5, k_R=6))
 
-        est <- optim(lpr_mean_d, log_posterior, ivt=ivtData,
-                     dat=dat, control = list(fnscale=-1), hessian=TRUE)
+
         plot(pkm(conc_mg_dl ~ time_h, data = dat, ivt = ivtData))
 
       }else{
@@ -173,7 +179,7 @@ shiny_pkm <- function(){
 
           # SAMPLE INFORMATION
           datHot <- stab[apply(stab, MARGIN = 1, function(x) any(x > 0)),]
-          # Required for compatibility with functions from Bayes.R
+          # Required for compatibility with functions
           names(datHot) <- c("time_h", "conc_mg_dl")
 
           # DOSING INFORMATION
@@ -182,21 +188,18 @@ shiny_pkm <- function(){
           # Convert duration of infusions to start/end times
           ivtHot[,"Duration (h)"] <- ivtHot[, "Start (h)"] + ivtHot[, "Duration (h)"]
 
-          # Required for compatibility with functions from Bayes.R
+          # Required for compatibility with functions
           names(ivtHot) <- c("begin", "end", "k_R")
           ivtHot <- apply(ivtHot, MARGIN = 1, function(x) list(begin = x[1], end = x[2], k_R = x[3]))
           ivtData <- ivtHot
 
 
-          est <- optim(lpr_mean_d, log_posterior, ivt=ivtData,
-                       dat=datHot, control = list(fnscale=-1), hessian=TRUE)
-          plot(pkm(conc_mg_dl ~ time_h, data = datHot, ivt = ivtHot))
+          pkm_mod <- pkm(conc_mg_dl ~ time_h, data = datHot, ivt = ivtHot, mcmc = isolate(input$MCMC))
 
+          plot(pkm_mod)
 
         }else if(sum(stab > 0) == 0){
           if(sum(dtab > 0) > 0){
-            dat <- data.frame("empty" = numeric(0))
-
             # DOSING INFORMATION
             # Get data from rhandsontable
             ivtHot <- dtab[apply(dtab, MARGIN = 1, function(x) any(x > 0)),]
@@ -208,10 +211,8 @@ shiny_pkm <- function(){
             ivtHot <- apply(ivtHot, MARGIN = 1, function(x) list(begin = x[1], end = x[2], k_R = x[3]))
             ivtData <- ivtHot
 
-            est <- optim(lpr_mean_d, log_posterior, ivt=ivtData,
-                         dat=dat, control = list(fnscale=-1), hessian=TRUE)
-
-            plot(pkm(conc_mg_dl ~ time_h, data = dat, ivt = ivtHot))
+            pkm_mod <- pkm(ivt = ivtHot, mcmc = isolate(input$MCMC))
+            plot(pkm_mod)
 
           }
         }

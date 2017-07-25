@@ -80,6 +80,6 @@ plot.pkm <- function(object, alp = 0.05, ...){
   abline(h = thres, lty = 2)
   legend("topright", bty = 'n',
          legend = c(paste("fT > threshold:", round(ftmic$ftmic, 3)),
-                    paste("95% CI: (", round(ftmic$conf.int[1], 3), ",",
+                    paste(ifelse(ftmic$mcmc, "Exact", "Approximate"), "95% CI: (", round(ftmic$conf.int[1], 3), ",",
                           round(ftmic$conf.int[2], 3), ")")))
 }
