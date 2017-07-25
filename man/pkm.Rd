@@ -6,7 +6,8 @@
 \usage{
 pkm(formula, data, subset, ivt, pars = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 =
   -7, lk_21 = -7, lerr = 2.33), alp = 0.05, cod = 12, thres = 64,
-  timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod), ...)
+  timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod), mcmc = FALSE,
+  nreps = 6000, nburnin = 3000, seed = NULL, shiny = FALSE, ...)
 }
 \arguments{
 \item{formula}{A formula where the left side is the measured concentration of drug
@@ -26,6 +27,8 @@ and rate of infusion at each dose}
 \item{cod}{Length of time after end of last dose to consider}
 
 \item{thres}{Threshold for effective treatment (mcg/ml)}
+
+\item{mcmc}{logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)}
 }
 \value{
 posterior estimates

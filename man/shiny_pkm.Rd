@@ -8,8 +8,6 @@ shiny_pkm()
 }
 \value{
 Launches an interaction interface for implementing Bayesian pharmacokinetic modeling
-
-Verify there aren't any problems running this - might need to import shiny, shinydashboard, and rhandsontable libraries
 }
 \description{
 Leave as-is? Or should any values be considered parameters

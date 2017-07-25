@@ -6,7 +6,9 @@
 \usage{
 mic_stat(ivt, th, dat = data.frame(), pars = c(lv_1 = 3.223, lk_10 = -1.65,
   lk_12 = -7, lk_21 = -7, lerr = 2.33), cod = 12, timeint = c(0,
-  max(sapply(ivt, function(x) x$end)) + cod), conf.level = 0.95)
+  max(sapply(ivt, function(x) x$end)) + cod), conf.level = 0.95,
+  mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL,
+  shiny = FALSE)
 }
 \arguments{
 \item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
@@ -22,6 +24,8 @@ and rate of infusion (g/h) at each dose}
 the statistic is computed. By default covers the full dosing period + \code{cod}}
 
 \item{conf.level}{Desired confidence level of the interval}
+
+\item{mcmc}{logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)}
 }
 \value{
 Fraction of time spent above the specified threshold from time of first dose through
