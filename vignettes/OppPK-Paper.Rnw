@@ -118,7 +118,9 @@ In the current context, $f$ is taken as the normal density function with mean ze
 \end{align}
 \noindent where $N_4(\mu_0, \Sigma_0)$ represents the 4-variate normal distribution with mean $\mu_0$ and covariance matrix $\Sigma_0$, and $N_1(m_0, s_0)$ represents the univariate normal distribution with mean $m_0$ and variance $s_0$. The prior distribution for the PK parameters represents our prior knowledge about the PK heterogeneity for a particular drug in a target population. Thus, the values of the prior hyperparameters should be carefully selected for the task at hand. In the current context, and by default, the hyperparameters are specified to correspond with estimates that arose from a study of piperacillin pharmacokinetics in a hospitalized, critically ill population. The particular values are listed in an appendix.
 
-Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for a specific summary of the curve: the length of time in which the concentration exceeds a specified value. Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic. We consider several methods as described in the following sections. [REWORD THIS LAST SENTENCE - all one method, just looking at different types of intervals]
+Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for a specific summary of the curve: the length of time in which the concentration exceeds a specified value. Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic.
+
+We consider several possible types of intervals: logit-transformed, probit-transformed, and untransformed intervals. Logit- and probit-transformed intervals restrict the computed confidence interval boundaries to be between 0 and 1. Untransformed intervals can yield bounds above 1, in which case the upper confidence limit is truncated at 1.
 
 % mention that here we are looking for the posterior of that specific statistic (ftmic)
 
@@ -144,6 +146,7 @@ h(\log \theta_i) \sim N(h(\log \hat{\theta_i}), G^T[-H]^{-1}G).
 The posterior coverage of the MIC statistic 95\% confidence interval was estimated as follows:
 
 One thousand samples were drawn from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the first 4 PK parameters and the standard error term corresponding to the 5th prior parameter. All observations were simulated during the final (5th) dosing period at 32, 32.5, 33, 34, 36, and 38 hours.
+% Is this sampling scheme okay? Representative of general sampling scheme?
 
 For each of the 50 sets of prior parameters and simulated data:
 
@@ -226,8 +229,6 @@ Plotted values represent the ``non-coverage'' in each tail region outside the 95
 \end{itemize}
 
 
-
-%other than comment about bibtex doc above, should be good for compilation up through this point
 
 
 % \section{Package Contents}
@@ -364,8 +365,6 @@ shiny_pkm()
 @
 
 % Insert screenshots of the application
-
-% Consider shiny_pkm() to use non-parallel version of calcaulation for sampling method if there are issues with exporitng functions.
 
 
 
