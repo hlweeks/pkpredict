@@ -32,7 +32,7 @@ pkm <- function(formula, data, subset, ivt,
                 pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                 alp=0.05, cod=12, thres=64,
                 timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-                mcmc = FALSE, ...) {
+                mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL, shiny = FALSE, ...) {
 
   # Allows formula, data, and subset to be optional (for prior only)
   mc <- match.call(expand.dots = FALSE)
@@ -84,7 +84,7 @@ pkm <- function(formula, data, subset, ivt,
 
   # MIC statistic information
   ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
-                    pars = pars, cod = cod, mcmc = mcmc)
+                    pars = pars, cod = cod, mcmc = mcmc, shiny = shiny)
 
   obj <- list(#"call" = match.call(),
               # Posterior estimate

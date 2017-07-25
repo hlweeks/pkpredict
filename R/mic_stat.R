@@ -26,7 +26,7 @@
 mic_stat <- function(ivt, th, dat = data.frame(),
                      pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                      cod = 12, timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-                     conf.level = .95, mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL){
+                     conf.level = .95, mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL, shiny = FALSE){
 
   # Times required for computations
   tms <- sapply(ivt, function(x) c(x$begin, x$end))
@@ -111,9 +111,17 @@ mic_stat <- function(ivt, th, dat = data.frame(),
 
     Sigma0 = solve(-est$hessian)
     theta_samples <- metro_iterate(nreps = nreps, theta0 = pars,
-                                    ivt = ivt, dat = dat, Sigma = Sigma0)[[1]][nburnin:nreps,]
-
-    mic_samples <- apply(theta_samples, MARGIN = 1, get_stat)
+                                    ivt = ivt, dat = dat, Sigma = Sigma0, shiny = shiny)[[1]][nburnin:nreps,]
+    mic_samples <- rep(NA, nrow(theta_samples))
+    if(shiny){
+      withProgress(message = 'Computing posterior estimates', value = 0, {
+                     for(i in 1:nrow(theta_samples)){
+                       incProgress(1/nrow(theta_samples))
+                       mic_samples[i] <- get_stat(theta_samples[i,])
+                     }})
+    }else{
+      mic_samples <- apply(theta_samples, MARGIN = 1, get_stat)
+    }
 
     ci_mic <- quantile(mic_samples, probs = c(alp/2, 1 - (alp/2)))
   }else{

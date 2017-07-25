@@ -64,7 +64,7 @@ shiny_pkm <- function(){
       ),
 
       HTML('<br/>'),
-      checkboxInput("MCMC", "Estimate fraction of time above threshold statistic using Markov-Chain Monte Carlo sampling of the posterior distribution.",
+      checkboxInput("MCMC", "Estimate fraction of time above threshold statistic using Markov chain Monte Carlo sampling of the posterior distribution.",
                     width = "200%"),
       actionButton("goPlot", "Update Plot", style = 'padding: 10px; font-size: 20px'),
       HTML('<br/><br/>'),
@@ -194,7 +194,8 @@ shiny_pkm <- function(){
           ivtData <- ivtHot
 
 
-          pkm_mod <- pkm(conc_mg_dl ~ time_h, data = datHot, ivt = ivtHot, mcmc = isolate(input$MCMC))
+          pkm_mod <- pkm(conc_mg_dl ~ time_h, data = datHot, ivt = ivtHot,
+                         mcmc = isolate(input$MCMC), shiny = TRUE)
 
           plot(pkm_mod)
 
@@ -211,7 +212,7 @@ shiny_pkm <- function(){
             ivtHot <- apply(ivtHot, MARGIN = 1, function(x) list(begin = x[1], end = x[2], k_R = x[3]))
             ivtData <- ivtHot
 
-            pkm_mod <- pkm(ivt = ivtHot, mcmc = isolate(input$MCMC))
+            pkm_mod <- pkm(ivt = ivtHot, mcmc = isolate(input$MCMC), shiny = TRUE)
             plot(pkm_mod)
 
           }
