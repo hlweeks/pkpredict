@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  3 AUG 2017 13:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  3 AUG 2017 13:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -326,40 +326,52 @@ Package color Info: Redefining color shadecolor on input line 206.
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
 (Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 208.
  [3]
-Package color Info: Redefining color shadecolor on input line 234.
+Package color Info: Redefining color shadecolor on input line 238.
 
 <./figure/intervalcomparison.pdf, id=23, 422.57875pt x 376.40625pt>
 File: ./figure/intervalcomparison.pdf Graphic file (type pdf)
 
 <use ./figure/intervalcomparison.pdf>
-Package pdftex.def Info: ./figure/intervalcomparison.pdf used on input line 259
+Package pdftex.def Info: ./figure/intervalcomparison.pdf used on input line 263
 .
 (pdftex.def)             Requested size: 422.57771pt x 376.40532pt.
-Package color Info: Redefining color shadecolor on input line 297.
  [4] [5 <./figure/intervalcomparison.pdf>]
-Package color Info: Redefining color shadecolor on input line 312.
-Package color Info: Redefining color shadecolor on input line 347.
-Package color Info: Redefining color shadecolor on input line 382.
+Package color Info: Redefining color shadecolor on input line 301.
+Package color Info: Redefining color shadecolor on input line 316.
+Package color Info: Redefining color shadecolor on input line 351.
 [6]
-Package color Info: Redefining color shadecolor on input line 407.
-Package color Info: Redefining color shadecolor on input line 433.
+Package color Info: Redefining color shadecolor on input line 386.
+Package color Info: Redefining color shadecolor on input line 411.
+Package color Info: Redefining color shadecolor on input line 437.
  [7]
-Package color Info: Redefining color shadecolor on input line 455.
-Package color Info: Redefining color shadecolor on input line 496.
+Package color Info: Redefining color shadecolor on input line 459.
+Package color Info: Redefining color shadecolor on input line 500.
  <figure/unnamed-chunk-15-1.pdf, id=46, 505.89pt x 505.89pt>
 File: figure/unnamed-chunk-15-1.pdf Graphic file (type pdf)
 
 <use figure/unnamed-chunk-15-1.pdf>
-Package pdftex.def Info: figure/unnamed-chunk-15-1.pdf used on input line 501.
+Package pdftex.def Info: figure/unnamed-chunk-15-1.pdf used on input line 505.
 (pdftex.def)             Requested size: 469.75502pt x 469.76265pt.
-Package color Info: Redefining color shadecolor on input line 511.
- [8] [9 <./figure/unnamed-chunk-15-1.pdf>]
-[10] (./OppPK-Paper.aux) ) 
+Package color Info: Redefining color shadecolor on input line 515.
+
+<./figure/appscreenshot.pdf, id=47, 676.5275pt x 620.3175pt>
+File: ./figure/appscreenshot.pdf Graphic file (type pdf)
+
+<use ./figure/appscreenshot.pdf>
+Package pdftex.def Info: ./figure/appscreenshot.pdf used on input line 527.
+(pdftex.def)             Requested size: 473.56601pt x 434.2193pt.
+
+Overfull \hbox (3.81099pt too wide) in paragraph at lines 527--528
+[][] 
+ []
+
+[8] [9 <./figure/unnamed-chunk-15-1.pdf>] [10 <./figure/appscreenshot.pdf>]
+[11] (./OppPK-Paper.aux) ) 
 Here is how much of TeX's memory you used:
- 2750 strings out of 493014
- 38538 string characters out of 6133351
+ 2755 strings out of 493014
+ 38678 string characters out of 6133351
  113945 words of memory out of 5000000
- 6250 multiletter control sequences out of 15000+600000
+ 6254 multiletter control sequences out of 15000+600000
  6593 words of font info for 25 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,16n,32p,1143b,319s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -379,10 +391,10 @@ mr8.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy
 .pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.
 pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.p
 fb>
-Output written on OppPK-Paper.pdf (10 pages, 229307 bytes).
+Output written on OppPK-Paper.pdf (11 pages, 678141 bytes).
 PDF statistics:
- 110 PDF objects out of 1000 (max. 8388607)
- 78 compressed objects within 1 object stream
+ 135 PDF objects out of 1000 (max. 8388607)
+ 94 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

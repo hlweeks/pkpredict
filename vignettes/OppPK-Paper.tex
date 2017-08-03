@@ -215,18 +215,22 @@ For each of the 50 sets of prior parameters and simulated data:
 \hlstd{miqr_frac} \hlkwb{<-} \hlkwd{miqr}\hlstd{(coverage_res}\hlopt{$}\hlstd{coverage_frac)}
 
 \hlstd{spf} \hlkwb{<-} \hlstd{purrr}\hlopt{::}\hlkwd{partial}\hlstd{(sprintf,} \hlkwc{fmt} \hlstd{=} \hlstr{"%.1f"}\hlstd{)}
+
+\hlkwd{spf}\hlstd{(miqr_frac}\hlopt{*}\hlnum{100}\hlstd{)}
+\hlkwd{spf}\hlstd{(miqr_logit}\hlopt{*}\hlnum{100}\hlstd{)}
+\hlkwd{spf}\hlstd{(miqr_probit}\hlopt{*}\hlnum{100}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 
 %Update these numbers with 1000 simulations
-{\it replace}
-	On 1,000 samples we calculated a median posterior coverage of `r spf(miqr_frac[2]*100)`\% with an IQR `r spf(miqr_frac[1]*100)`\% to `r spf(miqr_frac[3]*100)`\%.
-	%We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$.
+{\it replace}\\
+On 1,000 samples we calculated a median posterior coverage of 89.7\% with an IQR 87.4\% to 91.8\%.
+%We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$.
 
 Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
-For the logit-transformed interval, the Bayesian coverage had a median (IQR) of `r spf(miqr_logit[2]*100)`\% (`r spf(miqr_logit[1]*100)`\%, `r spf(miqr_logit[3]*100)`\%) and the probit-transformed interval had `r spf(miqr_probit[2]*100)`\% (`r spf(miqr_probit[1]*100)`\%, `r spf(miqr_probit[3]*100)`\%)
+For the logit-transformed interval, the Bayesian coverage had a median (IQR) of 89.1\% (86.5\%, 91.2\%) and the probit-transformed interval had 89.1\% (86.7\%, 91.3\%).
 
 
 
@@ -324,7 +328,7 @@ We have a vector of start times for five doses in hours since first infusion, an
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu Aug  3 13:19:22 2017
+% Thu Aug  3 13:39:13 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Infusion Schedule} 
@@ -356,7 +360,7 @@ We also have sample data from three blood draws, with information on the concent
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu Aug  3 13:19:22 2017
+% Thu Aug  3 13:39:13 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Data (observed from blood draws)} 
@@ -461,7 +465,7 @@ The model MIC statistic is exactly that produced by the \texttt{mic_stat} functi
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu Aug  3 13:19:26 2017
+% Thu Aug  3 13:39:16 2017
 \begin{table}[ht]
 \centering
 \caption{Predicted Values} 
@@ -517,6 +521,12 @@ An interactive implementation of the methods presented here can be launched with
 
 % Insert screenshots of the application
 
+\begin{figure}
+\caption{Screenshot of Shiny application run using \texttt{shiny_pkm()}}
+
+\includegraphics[scale=0.7]{appscreenshot.pdf}
+
+\end{figure}
 
 
 \section{Discussion}
@@ -532,6 +542,10 @@ An interactive implementation of the methods presented here can be launched with
 
 \end{itemize}
 
+
+When comparing the linear (untransformed) interval for target attainment with the logit- and probit-transformed intervals, none of the three stood out as being superior to the others. All intervals performed highly similarly. If anything, the linear interval was slightly closer to the nominal 95\% coverage rate, though only marginally so. Given these negligible differences and the fact that the linear interval can produce credible bounds above 1, which are outside the range of observable values, the \texttt{pkpredict} software uses a logit-transformed interval as the basis for calculations.
+
+Biological considerations should always be considered when using software of this nature. The example presented here monitored response to treatment using piperacillin in acute kidney injury patients being treated for sepsis. The current setup of the Bayesian prediction model assumes that the rates of elimination are constant across time. Piperacillin is, in part, excreted renally, and the fact that patients are simultaneously being treated for AKI could result in time-dependent elimination rates as the patient's kidney function improves or worsens over time. For short-term conditions like sepsis (verify that this is usually ``short term''), drastic changes in kidney function and in turn drastic changes in elimination rates are less likely. This may be a pertinent concern for other more volatile conditions.
 
 % write some stuff here
 
