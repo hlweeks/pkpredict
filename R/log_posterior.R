@@ -19,6 +19,7 @@ log_posterior <- function(lpr, ivt, dat) {
   if(nrow(dat) < 1) {
     log_prior(lpr)
   } else {
-    log_prior(lpr) + log_likelihood(lpr, ivt, dat)
+    res <- log_prior(lpr) + log_likelihood(lpr, ivt, dat)
   }
+
 }

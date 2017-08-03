@@ -1,12 +1,12 @@
 \documentclass{article}
-\usepackage{amsmath,underscore}
+\usepackage{amsmath,underscore,graphicx}
 \usepackage[margin=1in]{geometry}
-
+\graphicspath{{./figure/}}
 \newcommand{\mic}{$ft > 4 \times MIC$}
 
 \begin{document}
 
-<<>>=
+<<echo = F, message = F>>=
 # Other needed packages
 library(xtable)
 library(ggplot2)
@@ -42,7 +42,8 @@ library(rhandsontable)
 %\end{itemize}
 
 %[need references]
-Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as ciprofloxacin and piperacillin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure) \cite{Shotwell2015, Shotwell2016}. As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
+Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as ciprofloxacin and piperacillin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure) **. As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
+%**\cite{Shotwell2015, Shotwell2016} - need to sort out bibtex
 
 For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug consentration in the blood over time. These data can be used to estimate current an past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurments of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
 
@@ -158,7 +159,7 @@ For each of the 50 sets of prior parameters and simulated data:
 \section{Results}
 
 \subsection{Evaluation of approximation method}
-<<>>=
+<<eval = F>>=
 load("/Users/hannahweeks/Desktop/all_cov.rdta")
 
 # Median (IQR) for each
@@ -182,13 +183,12 @@ For the logit-transformed interval, the Bayesian coverage had a median (IQR) of 
 
 
 
-	<<>>=
+<<eval = F>>=
+ncov_logit$type <- "logit"
+ncov_probit$type <- "probit"
+ncov_frac$type <- "linear"
 
-	ncov_logit$type <- "logit"
-	ncov_probit$type <- "probit"
-	ncov_frac$type <- "linear"
-
-	ncov_res <- rbind(ncov_logit, ncov_probit, ncov_frac)
+ncov_res <- rbind(ncov_logit, ncov_probit, ncov_frac)
 # make sure column names are correct and that class == data.frame
 
 ncov_long <- reshape(ncov_res, varying = c("lower", "upper"), v.names = "ncov",
@@ -200,23 +200,28 @@ ncov_long <- subset(ncov_long, select = c("ncov", "side", "type"), drop = TRUE)
 cbColors <- c("#009E73", "#0072B2", "#D55E00")
 @
 
-\begin{figure}
-\caption{Comparison of confidence intervals for estimate of target attainment}
-<<echo = FALSE>>=
+<<echo = FALSE, eval = F>>=
 # Boxplots or violin plots?
 
 # With lines where we would want (actual middles are closer to .05)
-ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
+p <- ggplot(ncov_long, aes(x = type, y = ncov, fill = type)) +
   facet_grid(~ side) + geom_boxplot(na.rm = TRUE) +
   scale_fill_manual(values = cbColors) +
   geom_hline(yintercept = .025, linetype = 'dashed') +
   labs(x = "Interval Type", y = "95% Confidence Interval Tail Area") + guides(fill = FALSE)
+
+ggsave("intervalcomparison", plot = p, device = "pdf")
 @
+
+\begin{figure}
+\caption{Comparison of confidence intervals for estimate of target attainment}
+
+\includegraphics{intervalcomparison.pdf}
+
 \footnotesize
 Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval.
 \end{figure}
 
-% Should comment on the ones that are equal to 1
 
 % Other things to include in results
 \begin{itemize}
@@ -389,11 +394,11 @@ shiny_pkm()
 \begin{table}
 \begin{tabular}{lll} \hline
 Parameter & Value \\ \hline
-log($\mu_0$) =& (lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)\\
-$\Sigma_0 \sim$ & $300 \times$ \begin{bmatrix} 0.00167 & -0.00128 & 0 & 0\\
+log($\mu_0$) & = (lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)\\
+$\Sigma_0$ & $\sim$ 300 $\times$ $\begin{bmatrix} 0.00167 & -0.00128 & 0 & 0\\
                                 -0.00128 & 0.00154 &      0 &      0 \\
                                        0 &       0 & .00015 &      0 \\
-                                       0 &       0 &      0 & .00015)\end{bmatrix}\\ % log?
+                                       0 &       0 &      0 & .00015)\end{bmatrix}$ \\ % log?
 \hline
 \end{tabular}
 \caption{Prior hyperparameters for piperacillin in a population of hospitalized, critically ill patients.}\label{tab:hyp}

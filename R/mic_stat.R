@@ -26,7 +26,7 @@
 mic_stat <- function(ivt, th, dat = data.frame(),
                      pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                      cod = 12, timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-                     conf.level = .95, mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL, shiny = FALSE){
+                     conf.level = .95, mcmc = FALSE, nreps = 5000, nburnin = 2000, seed = NULL, shiny = FALSE){
 
   # Times required for computations
   tms <- sapply(ivt, function(x) c(x$begin, x$end))
@@ -74,7 +74,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
       ce <- unique(conc[tms == ied[i]] - th) #Printing two copies for some reason? Inserted unique to fix for now
       if(cb < 0 && ce > 0){
         # Crosses to above threshold during interval
-        root <- uniroot(f_mic, lower = ibe[i], upper = ied[i])$root #Must move from below to above
+        root <- uniroot(f_mic, lower = ibe[i], upper = ied[i], tol = .01)$root #Must move from below to above
         t_above <- t_above + (ied[i] - root)
       }else if(cb >= 0 && ce >= 0){
         # Above during whole interval
@@ -89,7 +89,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
       if(ce > 0 && c_next < 0){
         # Crosses to below threshold during interval
         ulim <- ifelse(j < length(ied), ibe[j+1], max(tms))
-        root <- uniroot(f_mic, lower = ied[j], upper = ulim)$root #Must move from above to below
+        root <- uniroot(f_mic, lower = ied[j], upper = ulim, tol = .01)$root #Must move from above to below
         t_above <- t_above + (root - ied[j])
       }else if(ce >= 0 && c_next >= 0){
         # Above during whole interval
@@ -104,14 +104,16 @@ mic_stat <- function(ivt, th, dat = data.frame(),
   # Confidence interval
   alp <- 1 - conf.level
 
+  Sigma0 <- solve(-est$hessian)
   ci_mic <- c(0,0)
   if(mcmc){
     # For reproducibility of sampling
     set.seed(seed)
 
-    Sigma0 = solve(-est$hessian)
-    theta_samples <- metro_iterate(nreps = nreps, theta0 = pars,
-                                    ivt = ivt, dat = dat, Sigma = Sigma0, shiny = shiny)[[1]][nburnin:nreps,]
+    theta_samples <- metro_iterate(nreps = nreps, theta0 = est$par,
+                                   ivt = ivt, dat = dat, Sigma = Sigma0,
+                                   shiny = shiny)[[1]][nburnin:nreps,]
+
     mic_samples <- rep(NA, nrow(theta_samples))
     if(shiny){
       withProgress(message = 'Computing posterior estimates', value = 0, {
@@ -132,7 +134,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
       log(mic/(1-mic)) ## constrain between 0 and 1
     })
 
-    sde_mic <- sqrt(diag(t(grd_mic) %*% solve(-est$hessian) %*% grd_mic))
+    sde_mic <- sqrt(diag(t(grd_mic) %*% Sigma0 %*% grd_mic))
 
     # Get CI for logit transformed statistic then backtransform to original scale
     ci_logit_mic <- log(stat/(1-stat)) + c(-1,1)*qnorm(1-alp/2)*sde_mic
@@ -148,3 +150,5 @@ mic_stat <- function(ivt, th, dat = data.frame(),
 
   return(ftmic)
 }
+
+
