@@ -83,7 +83,7 @@ pkm <- function(formula, data, subset, ivt,
   con <- apply(sol(tms)*1000, 2, function(x) pmax(0,x))
 
   # MIC statistic information
-  ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
+  ftmic <- mic_stat2(ivt = ivt, th = thres, dat = dat,
                     pars = pars, cod = cod, mcmc = mcmc, shiny = shiny)
 
   obj <- list(#"call" = match.call(),
