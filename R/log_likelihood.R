@@ -35,5 +35,7 @@ log_likelihood <- function(lpr, ivt, dat, init = c(0,0)) {
   dat$pconc_g_l   <- sol(dat$time_h)[1,]
   dat$pconc_mcg_ml <- 1000*dat$pconc_g_l
 
-  with(dat, sum(dnorm(conc_mcg_ml, pconc_mcg_ml, epr[5], log=TRUE)))
+  res <- with(dat, sum(dnorm(conc_mcg_ml, pconc_mcg_ml, epr[5], log=TRUE)))
+  attr(res, "soln") <- sol
+  return(res)
 }

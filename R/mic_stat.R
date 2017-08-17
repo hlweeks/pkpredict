@@ -45,10 +45,15 @@ mic_stat <- function(ivt, th, dat = data.frame(),
   est <- optim(pars, log_posterior, ivt = ivt, dat = dat,
                control = list(fnscale=-1), hessian=TRUE)
 
-  get_stat <- function(pkpars){
+  get_stat <- function(pkpars, inherit.soln = FALSE){
     # Get PK solution equation evaluated at parameters
-    soln <- pk_solution(v_1=exp(pkpars[1]), k_10=exp(pkpars[2]),
-                        k_12=exp(pkpars[3]), k_21=exp(pkpars[4]), ivt=ivt)
+    if(inherit.soln){
+      soln <- attributes(pkpars)$soln
+    }else{
+      soln <- pk_solution(v_1=exp(pkpars[1]), k_10=exp(pkpars[2]),
+                          k_12=exp(pkpars[3]), k_21=exp(pkpars[4]), ivt=ivt)
+    }
+
     #Values of the posterior concentrations
     con <- apply(soln(tms)*1000, 2, function(x) pmax(0,x))
     conc <- con[1,]
@@ -113,7 +118,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
     theta_samples <- metro_iterate(nreps = nreps, theta0 = est$par,
                                    ivt = ivt, dat = dat, Sigma = Sigma0,
                                    shiny = shiny)[[1]][nburnin:nreps,]
-
+    print(class(theta_samples))
     mic_samples <- rep(NA, nrow(theta_samples))
     if(shiny){
       withProgress(message = 'Computing posterior estimates', value = 0, {
@@ -122,7 +127,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
                        mic_samples[i] <- get_stat(theta_samples[i,])
                      }})
     }else{
-      mic_samples <- apply(theta_samples, MARGIN = 1, get_stat)
+      mic_samples <- apply(theta_samples, MARGIN = 1, get_stat, inherit.soln = TRUE)
     }
 
     ci_mic <- quantile(mic_samples, probs = c(alp/2, 1 - (alp/2)))
