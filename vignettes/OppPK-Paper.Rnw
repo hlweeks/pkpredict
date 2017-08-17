@@ -329,6 +329,14 @@ post_ft.mic
 @
 
 
+By default, the \texttt{mic_stat} function uses the Laplace approximation to calculate an approximate credible interval for target attainment. The user can also specify the argument \texttt{mcmc = TRUE} to use MCMC to obtain a more precise credible interval.
+
+<<>>=
+# Posterior estimate after observed measurements
+post_ft.mic_mcmc <- mic_stat(ivt = ivt_d, dat = dat_d, th = 64, mcmc = TRUE)
+post_ft.mic_mcmc
+@
+
 
 \subsection{PK Model}
 package functions: \texttt{pkm}
@@ -340,14 +348,32 @@ pk.fit <- pkm(formula = con ~ time, data = dat_d,
 pk.fit$ftmic
 @
 
-The model MIC statistic is exactly that produced by the \texttt{mic_stat} function. Below we extract the predicted values, either directly from the model object (returns values calculated at infusion and blood draw times), or at user-specified times with the \texttt{predict.pkm} method.
+The model MIC statistic is exactly that produced by the \texttt{mic_stat} function.
+% write print method, other necessary commentary on the model object
+
+\subsection{Model Methods}
+package functions: \texttt{plot.pkm}, \texttt{predict.pkm}, \texttt{update.pkm}, \texttt{confint.pkm}
+
+Calling \texttt{plot} on the model object returns a visual representation of the patient's concentration-time curve for the administered drug.
+
+\begin{figure}
+<<>>=
+plot(pk.fit)
+@
+\end{figure}
+
+
+Below we extract the predicted values with the \texttt{predict.pkm} method. By default, the \texttt{predict} method returns the estimated concentration of drug in the bloodstream at the supplied start and end of infusion times, and (if applicable) the times associated with concentration measurements from the model. Alternatively, the user can supply specific times at which to compute the estimated drug concentration.
 
 <<>>=
 pred.df <- pk.fit$fitted.values
-# all.equal(pred.df$conc == predict(pk.fit)) # need to fix predict.pkm
+
+all.equal(pred.df$conc,  predict(pk.fit)[,"Concentration"])
 @
 
 <<echo = F, results = 'asis'>>=
+# Update predict.pkm to provide confidence intervals rather than SE? Or keep as SE?
+
 names(pred.df) <- c("Time Since First Infusion (h)", "Concentration (mcg/mL)", "Standard Error")
 
 xdf <- xtable(pred.df, digits = 2, caption = "Predicted Values")
@@ -355,15 +381,7 @@ align(xdf) <- rep('c', 4)
 print(xdf, caption.placement = "top", include.rownames = FALSE)
 @
 
-\subsection{Model Methods}
-package functions: \texttt{plot.pkm}, \texttt{predict.pkm}, \texttt{update.pkm}, \texttt{confint.pkm}
-
-
-\begin{figure}
-<<>>=
-plot(pk.fit)
-@
-\end{figure}
+\newpage
 
 \subsection{Shiny GUI}
 
@@ -373,12 +391,11 @@ An interactive implementation of the methods presented here can be launched with
 shiny_pkm()
 @
 
-% Insert screenshots of the application
 
 \begin{figure}
 \caption{Screenshot of Shiny application run using \texttt{shiny_pkm()}}
 
-\includegraphics[scale=0.7]{appscreenshot.pdf}
+\includegraphics[scale=0.5]{appscreenshot.pdf}
 
 \end{figure}
 
@@ -401,7 +418,7 @@ When comparing the linear (untransformed) interval for target attainment with th
 
 Biological considerations should always be considered when using software of this nature. The example presented here monitored response to treatment using piperacillin in acute kidney injury patients being treated for sepsis. The current setup of the Bayesian prediction model assumes that the rates of elimination are constant across time. Piperacillin is, in part, excreted renally, and the fact that patients are simultaneously being treated for AKI could result in time-dependent elimination rates as the patient's kidney function improves or worsens over time. For short-term conditions like sepsis (verify that this is usually ``short term''), drastic changes in kidney function and in turn drastic changes in elimination rates are less likely. This may be a pertinent concern for other more volatile conditions.
 
-% write some stuff here
+
 
 \section{Appendix: Prior hyperparameters for piperacillin among critically ill}
 \begin{center}
