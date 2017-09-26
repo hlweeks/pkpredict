@@ -85,12 +85,12 @@
 %\end{itemize}
 
 %[need references]
-Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as ciprofloxacin and piperacillin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure) **. As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
+Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as piperacillin and ciprofloxacin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure) **. As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
 %**\cite{Shotwell2015, Shotwell2016} - need to sort out bibtex
 
-For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug consentration in the blood over time. These data can be used to estimate current an past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurments of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
+For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug concentration in the blood over time. These data can be used to estimate current and past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurments of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
 
-We implement Bayesian methods using pharmacokinetic data from a prior study [cite] to provide posterior estimates of individual  target attainment, measured as the fraction of the dosing period spent above the necessary blood concentration threshold. The fact that patients tend to vary widely in their response to treatment indicates that measures of uncertainty are critical to understanding response to treatment at both the population and patient-specific level. In order for the implementation of such procedures to be truly beneficial to individuals, it is necessary to have a method of assessing and predicting patient response in real time. This introduces the issue of selecting a statistical approximation technique that is both accurate in its quantification of uncertainty while also being computationally feasible to implement via a web application. Our statistical methodology is paired with a web application that implements these techniques and makes them accessible to, for example, a physician in real time. We present assessments of the performance and computational efficiency for interval approximations.
+We implement Bayesian methods using pharmacokinetic data from a prior study [cite] to provide posterior estimates of individual target attainment, measured as the fraction of the dosing period spent above a specified blood concentration threshold; usually a multiple of a minimum inhibitory concentration (MIC). The minimum inhibitory concentration is the amount of the drug required to suppress the offending microorganism. This particular summary of target attainment (denoted $T>k$MIC, where $k$ is positive) is useful for antibiotics that have time-dependent effectiveness. Other summaries, such as the peak concentration, may be useful for antibiotics with concentration-dependent effectiveness. Due to significant pharmacokinetic heterogeneity, measures of statistical uncertainty about $T>k$MIC are critical for understanding response to treatment at the patient-specific level, and for clinical decision-making. We summarize this statistical uncertainty by computing and presenting 95\% credible intervals for patient-specific estiamtes of $T>k$MIC. However, in order for these methods to be practicable, it is necessary that computation can occur in real time. Due to the computational intensity of exact methods (e.g., Markov chain Monte Carlo), we sought to identify statistical approximations that are both accurate with regard to quantification of statistical uncertainty (i.e., the effective level of the approximate credible interval closely matches the nominal level, 95\%) while also being computationally feasible to implement with no significant delay (e.g., via a web application). We accomplish this by using a serie of statistical approximations paired with a web application that renders these techniques accessible to, for example, a practicing physician. We present assessments of the accuracy and computational efficiency for this approach.
 
 % [MSS note: I think this need to be in the last paragraph of the introduction] The aim of this work is to facilitate accurate, real-time therapeutic drug monitoring (TDM).
 
@@ -125,22 +125,16 @@ $v_1$  & L & Volume of central compartment\\
 % alternative: observation period
 To assess patient response to treatment by measuring {\it target attainment}, defined in this context to be the fraction of dosing window for which the concentration of piperacillin in the bloodstream is 64$\mu$g/mL: four times the minimum inhibitory concentration (MIC) for piperacillin. We denote this statistic as \mic. Dosing for a patient needs to be enough that the concentration in the blood remains above the necessary threshold for suppression of the offending microorganism, yet not so high as to increase the risk of adverse side effects including toxicity. Typically, a multiple of the minimum inhibitory concentration is used for such measurements, since drug concentration is attenuated in muscle tissue relative to the bloodstream. \\
 
-% Is it necessary to define the acronym IV?
 % Insert link to next section for concentration-time curve. I mention it in this calculation but it's derived from the Bayesian model below.
-We measure \mic by calculating a simple proportion of the time during the dosing window above 64$\mu$g/mL. By default, the method considers the conclusion of the dosing window to be 12 hours after the end of the final infusion. If implementing this method with other medications, the limit of the dosing window may need to be altered based on drug-specific properties such as the rate of elimination. We use a bisection root-finding method to identify the times at which the patient's concentration-time curve crosses 64$\mu$g/mL. Drug concentration increases if and only if the drug is actively being infused intravenously. Once the IV is removed, the drug concentration can only decrease. Thus, the adjacent time points at which one infusion ends and the next begins (and vice versa) are used as endpoints in the bisection process.\\
+We measure \mic by calculating a simple proportion of the time during the dosing window above 64$\mu$g/mL. By default, the method considers the conclusion of the full dosing window to be 12 hours after the end of the final infusion. If implementing this method with other medications, the limit of the dosing window may need to be altered based on drug-specific properties such as the rate of elimination. We use a bisection root-finding method to identify the times at which the patient's concentration-time curve crosses 64$\mu$g/mL. Drug concentration increases if and only if the drug is actively being infused intravenously. Once the IV is removed, the drug concentration can only decrease. Thus, the adjacent time points at which one infusion ends and the next begins (and vice versa) are used as endpoints in the bisection process.\\
 
 
 % Is this more relevant here or in the Bayesian model section?
-Time 0 is taken to be the time of first drug infusion. Necessarily, this assumes that the concentration of drug in the patient's body is 0$\mu$g/mL at time 0.
-
 % Is the 50% threshold generally a target? Or was that just for the prior study/other paper?
-A specific pharmacodynamic target is usually outlined, e.g. \mic $> 0.5$.
+Time 0 is taken to be the time of first drug infusion. This assumes that the concentration of drug in the patient's body is 0$\mu$g/mL at time 0. A specific pharmacodynamic target is usually outlined. In this case where we are considering piperacillin, the target is \mic $> 0.5$, or at least half of the dosing window is spent above the desired threshold.
 
+% There are specific criteria for spending a certain amount of time above the threshold, are there accepted criteria for toxicity thresholds? (defined either by time or concentration or a combination between the two) - is this something we need to address?
 
-
-% There are specific criteria for spending a certain amount of time above the threshold, are there accepted criteria for toxicity thresholds? (defined either by time or concentration or a combination between the two)
-
-% introduce the time above MIC statistic and how we calculate/approximate it based on the intersection of the curve with the MIC.
 
 
 \subsection{Bayes prediction model} % statistical model
@@ -160,14 +154,11 @@ In the current context, $f$ is taken as the normal density function with mean ze
 [\log \theta_i] &\sim N_4(\mu_0, \Sigma_0) \\
 [\log \sigma] &\sim N_1(m_0, s_0)
 \end{align}
-\noindent where $N_4(\mu_0, \Sigma_0)$ represents the 4-variate normal distribution with mean $\mu_0$ and covariance matrix $\Sigma_0$, and $N_1(m_0, s_0)$ represents the univariate normal distribution with mean $m_0$ and variance $s_0$. The prior distribution for the PK parameters represents our prior knowledge about the PK heterogeneity for a particular drug in a target population. Thus, the values of the prior hyperparameters should be carefully selected for the task at hand. In the current context, and by default, the hyperparameters are specified to correspond with estimates that arose from a study of piperacillin pharmacokinetics in a hospitalized, critically ill population. The particular values are listed in an appendix.
+\noindent where $N_4(\mu_0, \Sigma_0)$ represents the 4-variate normal distribution with mean $\mu_0$ and covariance matrix $\Sigma_0$ for the pharmacokinetic parameters, and $N_1(m_0, s_0)$ represents the univariate normal distribution with mean $m_0$ and variance $s_0$. The prior distribution for the PK parameters represents our prior knowledge about the PK heterogeneity for a particular drug in a target population. Thus, the values of the prior hyperparameters should be carefully selected for the task at hand. In the current context, and by default, the hyperparameters are specified to correspond with estimates that arose from a study of piperacillin pharmacokinetics in a hospitalized, critically ill population. The particular values are listed in an appendix.
 
-Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for a specific summary of the curve: the length of time in which the concentration exceeds a specified value. Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic.
+Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for a specific summary of the curve (\mic). Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic. Implementation of Laplace and delta method approximations allow for rapid computation of posterior estimates.
 
-We consider several possible types of intervals: logit-transformed, probit-transformed, and untransformed intervals. Logit- and probit-transformed intervals restrict the computed confidence interval boundaries to be between 0 and 1. Untransformed intervals can yield bounds above 1, in which case the upper confidence limit is truncated at 1.
-
-% mention that here we are looking for the posterior of that specific statistic (ftmic)
-
+We consider several possible types of intervals for \mic: logit-transformed, probit-transformed, and untransformed intervals. Logit- and probit-transformed intervals restrict the computed confidence interval boundaries to be between 0 and 1. Untransformed intervals can yield bounds above 1, in which case the upper confidence limit is truncated at 1. The untransformed 95\% credible interval is computed as $\hat{\theta} \pm z_{0.975} SE(\hat{\theta})$. Gradients for the transformed intervals are computed using the delta method.
 
 
 \subsubsection{Laplace approximation}
@@ -187,73 +178,29 @@ h(\log \theta_i) \sim N(h(\log \hat{\theta_i}), G^T[-H]^{-1}G).
 
 	We compared the performance of three different interval types: logit-transformed, probit-transformed, and untransformed (further referred to as the linear interval). We obtain 1,000 draws (``patients'') from the prior distribution of pharmacokinetic parameters. For each patient, we simulated 95\% confidence intervals for each of the three types using the Metropolis MCMC algorithm.
 
-The posterior coverage of the MIC statistic 95\% confidence interval was estimated as follows:
+The posterior coverage of the MIC statistic 95\% confidence interval was estimated as follows: one thousand samples were drawn from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the 4 PK parameters and the standard error term corresponding to the 5th prior parameter. Patients were assumed to receive five 30 minute infusions administered every 8 hours. All observations were simulated during the final (5th) dosing period at 32, 32.5, 33, 34, 36, and 38 hours to evaluate coverage when a patient's response to the drug has achieved a more steady state.
 
-One thousand samples were drawn from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the first 4 PK parameters and the standard error term corresponding to the 5th prior parameter. All observations were simulated during the final (5th) dosing period at 32, 32.5, 33, 34, 36, and 38 hours.
-% Is this sampling scheme okay? Representative of general sampling scheme?
-
-For each of the 50 sets of prior parameters and simulated data:
+For each of the 1,000 sets of prior parameters and simulated data:
 
 \begin{itemize}
 	 \item A Laplace approximation to the posterior density was calculated and the delta method used to estimate the standard errors of the MIC statistic. A 95\% asymptotic normal confidence interval was used with the delta method standard errors to estimate upper and lower bounds.
-	 \item 3,000 samples from the posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm with 2,000 warm-up iterations. The proportion of the 3,000 posterior samples falling within the upper and lower bounds was used to estimate the proportion of the posterior distribution of the MIC statistic falling within the confidence interval.
+	 \item 3,000 samples from the posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm with 2,000 warm-up iterations. The proportion of the 3,000 posterior samples falling within the upper and lower bounds of the interval was used to estimate the proportion of the posterior distribution of the MIC statistic falling within the confidence interval.
 \end{itemize}
 
 \section{Results}
 
 \subsection{Evaluation of approximation method}
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{load}\hlstd{(}\hlstr{"/Users/hannahweeks/Desktop/all_cov.rdta"}\hlstd{)}
 
-\hlcom{# Median (IQR) for each}
-\hlstd{miqr} \hlkwb{<-} \hlstd{purrr}\hlopt{::}\hlkwd{partial}\hlstd{(quantile,} \hlkwc{probs} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{.25}\hlstd{,} \hlnum{.5}\hlstd{,} \hlnum{.75}\hlstd{),} \hlkwc{na.rm} \hlstd{= T)}
-
-\hlstd{miqr_logit} \hlkwb{<-} \hlkwd{miqr}\hlstd{(coverage_res}\hlopt{$}\hlstd{coverage_logit)}
-\hlstd{miqr_probit} \hlkwb{<-} \hlkwd{miqr}\hlstd{(coverage_res}\hlopt{$}\hlstd{coverage_probit)}
-\hlstd{miqr_frac} \hlkwb{<-} \hlkwd{miqr}\hlstd{(coverage_res}\hlopt{$}\hlstd{coverage_frac)}
-
-\hlstd{spf} \hlkwb{<-} \hlstd{purrr}\hlopt{::}\hlkwd{partial}\hlstd{(sprintf,} \hlkwc{fmt} \hlstd{=} \hlstr{"%.1f"}\hlstd{)}
-
-\hlkwd{spf}\hlstd{(miqr_frac}\hlopt{*}\hlnum{100}\hlstd{)}
-\hlkwd{spf}\hlstd{(miqr_logit}\hlopt{*}\hlnum{100}\hlstd{)}
-\hlkwd{spf}\hlstd{(miqr_probit}\hlopt{*}\hlnum{100}\hlstd{)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
 
 
 %Update these numbers with 1000 simulations
-{\it replace}\\
-On 1,000 samples we calculated a median posterior coverage of 89.7\% with an IQR 87.4\% to 91.8\%.
+On 1,000 samples with a linear interval for \mic we calculated a median posterior coverage of 89.7\% with an IQR 87.4\% to 91.8\%. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used. For the logit-transformed interval, the Bayesian coverage had a median (IQR) of 89.1\% (86.5\%, 91.2\%) and the probit-transformed interval had 89.1\% (86.7\%, 91.3\%).
+
 %We calculate a Monte-Carlo standard error of approximately $\sqrt{(0.9)(0.1)/3000} = 0.005$.
 
-Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the original scale was used.
-For the logit-transformed interval, the Bayesian coverage had a median (IQR) of 89.1\% (86.5\%, 91.2\%) and the probit-transformed interval had 89.1\% (86.7\%, 91.3\%).
 
 
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{ncov_logit}\hlopt{$}\hlstd{type} \hlkwb{<-} \hlstr{"logit"}
-\hlstd{ncov_probit}\hlopt{$}\hlstd{type} \hlkwb{<-} \hlstr{"probit"}
-\hlstd{ncov_frac}\hlopt{$}\hlstd{type} \hlkwb{<-} \hlstr{"linear"}
-
-\hlstd{ncov_res} \hlkwb{<-} \hlkwd{rbind}\hlstd{(ncov_logit, ncov_probit, ncov_frac)}
-\hlcom{# make sure column names are correct and that class == data.frame}
-
-\hlstd{ncov_long} \hlkwb{<-} \hlkwd{reshape}\hlstd{(ncov_res,} \hlkwc{varying} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"lower"}\hlstd{,} \hlstr{"upper"}\hlstd{),} \hlkwc{v.names} \hlstd{=} \hlstr{"ncov"}\hlstd{,}
-                     \hlkwc{timevar} \hlstd{=} \hlstr{"side"}\hlstd{,} \hlkwc{times} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"lower"}\hlstd{,} \hlstr{"upper"}\hlstd{),}
-                     \hlkwc{direction} \hlstd{=} \hlstr{"long"}\hlstd{)}
-\hlkwd{rownames}\hlstd{(ncov_long)} \hlkwb{<-} \hlkwa{NULL}
-\hlstd{ncov_long} \hlkwb{<-} \hlkwd{subset}\hlstd{(ncov_long,} \hlkwc{select} \hlstd{=} \hlkwd{c}\hlstd{(}\hlstr{"ncov"}\hlstd{,} \hlstr{"side"}\hlstd{,} \hlstr{"type"}\hlstd{),} \hlkwc{drop} \hlstd{=} \hlnum{TRUE}\hlstd{)}
-
-\hlstd{cbColors} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"#009E73"}\hlstd{,} \hlstr{"#0072B2"}\hlstd{,} \hlstr{"#D55E00"}\hlstd{)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
 
 
 
@@ -263,19 +210,17 @@ For the logit-transformed interval, the Bayesian coverage had a median (IQR) of 
 \includegraphics{intervalcomparison.pdf}
 
 \footnotesize
-Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval.
+Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval. Overall the three types of intervals appear similar in their performance. The transformed intervals more often have higher rates of non-coverage in the lower tail than the upper. Since the intervals have similar performance, in the \texttt{pkpredict} package logit-transformed intervals are used for \mic interval computations to enforce the $[0,1]$ bounds.
 \end{figure}
 
 
-% Other things to include in results
-\begin{itemize}
-\item used MCMC as gold-standard
-\item quantified posterior probability contained within approximate intervals for $logit^{-1}(h(log \theta_i))$
-\item quantified number of posterior evaluations % X
-\item quantified computing time % give brief summary how long it takes on average to compute each interval using sampling or approx
-\item note: make sure to uncomment line below and set up the bibtex doc
-%\item use ``plasmode'' simulation to assess quality of method across variety of individuals (PK heterogeneity in this pop); recent example of plasmode use in \cite{Franklin2014}; pioneered by \cite{Vaughan2009} % make sure this line runs - might be an issue w/ configuring bibtex document
-\end{itemize}
+% % Other things to include in results?
+% \begin{itemize}
+% \item quantified posterior probability contained within approximate intervals for $logit^{-1}(h(log \theta_i))$ - maybe in methods
+% \item quantified computing time % give brief summary how long it takes on average to compute each interval using sampling or approx
+% \item note: make sure to uncomment line below and set up the bibtex doc
+% %\item use ``plasmode'' simulation to assess quality of method across variety of individuals (PK heterogeneity in this pop); recent example of plasmode use in \cite{Franklin2014}; pioneered by \cite{Vaughan2009} % make sure this line runs - might be an issue w/ configuring bibtex document
+% \end{itemize}
 
 
 
@@ -285,17 +230,18 @@ Plotted values represent the ``non-coverage'' in each tail region outside the 95
 % The primary function within the \texttt{pkm} package is the \texttt{pkm} function.
 
 
-
 \section{Example}
 
-\begin{itemize}
-  \item Generate ivt data frame
-  \item obtain raw mic estimate
-  \item fit pkm model
-  \item plot estimates
-  \item update the model and re-plot estimates
-  \item shiny app demo
-\end{itemize}
+Below we provide an example outlining how to implement this methodology using the \texttt{pkpredict} package. The minimum amount of information required to use the provided functions is the infusion schedule for a given patient of interest. All functions use data only associated with a single patient.
+
+% \begin{itemize}
+%   \item Generate ivt data frame
+%   \item obtain raw mic estimate
+%   \item fit pkm model
+%   \item plot estimates
+%   \item update the model and re-plot estimates
+%   \item shiny app demo
+% \end{itemize}
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -306,12 +252,11 @@ Plotted values represent the ``non-coverage'' in each tail region outside the 95
 \end{kframe}
 \end{knitrout}
 
-{\large note: for key functions, list the parameters that can be manipulated and what they do, default values, etc}
 
 \subsection{Sample infusion schedule and concentation data}
-package functions: \texttt{ivt\_toList}
+%Package functions: \texttt{ivt\_toList}
 
-We have a vector of start times for five doses in hours since first infusion, and the duration of each dose. In this case, the duration is the same for each dose: half an hour. The rate of infusion is 6 g/h for all administered doses.
+We have a vector of start times for five doses in hours since first infusion, and the duration of each dose. In this case, the duration is the same for each dose: half an hour. The rate of infusion is 6 g/h for all administered doses. Alternatively, the \texttt{ivt\_toList} function can take start and end dosing times rather than start times and duration.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -328,7 +273,7 @@ We have a vector of start times for five doses in hours since first infusion, an
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu Aug  3 13:39:13 2017
+% Tue Sep 26 10:31:42 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Infusion Schedule} 
@@ -360,7 +305,7 @@ We also have sample data from three blood draws, with information on the concent
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu Aug  3 13:39:13 2017
+% Tue Sep 26 10:31:43 2017
 \begin{table}[ht]
 \centering
 \caption{Sample Data (observed from blood draws)} 
@@ -378,10 +323,9 @@ Time (h) & Concentration (mcg/mL) \\
 
 
 \subsection{MIC estimates}
-package functions: \texttt{mic_stat}
+%package functions: \texttt{mic_stat}
 
-
-We first obtain a prior estimate of target attainment ({\bf make sure this is defined above}) based on the infusion schedule outlined above. By default, the \texttt{mic\_stat} function calculates the $fT > 4 \times MIC$ (notation from paper Matt sent - make sure this notation is introduced above).
+First, we obtain a prior estimate of target attainment based on the infusion schedule outlined above. By default, the \texttt{mic\_stat} function calculates the $fT > 4 \times MIC$, using a threshold of 64 $\mu$g/mL for piperacillin. The dosing window is assumed to end 12 hours after the end of the final infusion, and can be customized if desired.
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -405,7 +349,7 @@ We first obtain a prior estimate of target attainment ({\bf make sure this is de
 \end{kframe}
 \end{knitrout}
 
-This prior estimate of target attainment represents how we would expect a typical patient to respond to treatment over the course of this infusion schedule, in lieu of any blood concentration measurements. We can incorporate the observed blood draws and obtain an individualized estimate of target attainment based on the patient's data.
+Without considering patient response from blood draws, the model estimates a patient on this infusion schedule will spend 47.8\% (95\% CI 9.2\% - 89.3\%) of their time above the desired threshold. This prior estimate of target attainment represents how we would expect a typical patient to respond to treatment over the course of this infusion schedule, in lieu of any blood concentration measurements. We can incorporate the observed blood draws and obtain an individualized estimate of target attainment based on the patient's data. By adding in concentration measurements from blood draws, we obtain posterior estimates.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -428,14 +372,18 @@ This prior estimate of target attainment represents how we would expect a typica
 \end{knitrout}
 
 
+Our updated estimate of \mic is 73.5\% (95\% CI 47.6\% - 89.5\%). By default, the \texttt{mic_stat} function uses the Laplace approximation to calculate an approximate credible interval for target attainment. The user can also specify the argument \texttt{mcmc = TRUE} to use MCMC to obtain a more precise credible interval.
+
 
 \subsection{PK Model}
-package functions: \texttt{pkm}
+%package functions: \texttt{pkm}
 
-Fitting the model here
+The \texttt{pkm} function fits a two-compartment model to obtain estimates of the concentation-time curve and \mic.
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
+\hlcom{# Fit the PK model}
 \hlstd{pk.fit} \hlkwb{<-} \hlkwd{pkm}\hlstd{(}\hlkwc{formula} \hlstd{= con} \hlopt{~} \hlstd{time,} \hlkwc{data} \hlstd{= dat_d,}
               \hlkwc{ivt} \hlstd{= ivt_d,} \hlkwc{thres} \hlstd{=} \hlnum{64}\hlstd{)}
 \hlstd{pk.fit}\hlopt{$}\hlstd{ftmic}
@@ -453,19 +401,25 @@ Fitting the model here
 \end{kframe}
 \end{knitrout}
 
-The model MIC statistic is exactly that produced by the \texttt{mic_stat} function. Below we extract the predicted values, either directly from the model object (returns values calculated at infusion and blood draw times), or at user-specified times with the \texttt{predict.pkm} method.
+The model MIC statistic is exactly that produced by the \texttt{mic_stat} function.
+
+Below we extract the predicted concentration values. The estimated concentration of drug in the bloodstream at the supplied start and end of infusion times, and (if applicable) the times associated with concentration measurements from the model.
+
+%all.equal(pred.df$conc,  predict(pk.fit)[,"Concentration"])
+%Update predict.pkm to provide confidence intervals rather than SE? Or keep as SE?
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{pred.df} \hlkwb{<-} \hlstd{pk.fit}\hlopt{$}\hlstd{fitted.values}
-\hlcom{# all.equal(pred.df$conc == predict(pk.fit)) # need to fix predict.pkm}
+
+\hlkwd{names}\hlstd{(pred.df)} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"Time Since First Infusion (h)"}\hlstd{,} \hlstr{"Concentration (mcg/mL)"}\hlstd{,} \hlstr{"Standard Error"}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 % latex table generated in R 3.3.3 by xtable 1.8-2 package
-% Thu Aug  3 13:39:16 2017
+% Tue Sep 26 10:31:45 2017
 \begin{table}[ht]
 \centering
 \caption{Predicted Values} 
@@ -491,9 +445,8 @@ Time Since First Infusion (h) & Concentration (mcg/mL) & Standard Error \\
 \end{table}
 
 
-\subsection{Model Methods}
-package functions: \texttt{plot.pkm}, \texttt{predict.pkm}, \texttt{update.pkm}, \texttt{confint.pkm}
 
+Calling \texttt{plot} on the model object returns a visual representation of the patient's concentration-time curve for the administered drug.
 
 \begin{figure}
 \begin{knitrout}
@@ -507,9 +460,13 @@ package functions: \texttt{plot.pkm}, \texttt{predict.pkm}, \texttt{update.pkm},
 \end{knitrout}
 \end{figure}
 
+
+
+\newpage
+
 \subsection{Shiny GUI}
 
-An interactive implementation of the methods presented here can be launched within the package by calling \texttt{shiny_pkm}. This function procudes a web application, created using the {\it shiny} package in R. In the application, users can enter information about a patient's infusion schedule and and concentration data collected from blood draws. By default, the application uses the infusion schedule in the example above.
+An interactive implementation of the methods presented here can be launched within the package by calling \texttt{shiny_pkm}. This function procudes a web application, created using the {\it shiny} package in R. In the application, users can enter information about a patient's infusion schedule and and concentration data collected from blood draws. By default, the application uses the infusion schedule in the example above. There is a checkbox option to allow for computation of the \mic credible interval using Markov chain Monte Carlo sampling for an exact interval. This method is more accurate, but takes much longer to perform.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -519,35 +476,18 @@ An interactive implementation of the methods presented here can be launched with
 \end{kframe}
 \end{knitrout}
 
-% Insert screenshots of the application
 
 \begin{figure}
 \caption{Screenshot of Shiny application run using \texttt{shiny_pkm()}}
 
-\includegraphics[scale=0.7]{appscreenshot.pdf}
+\includegraphics[scale=0.5]{appscreenshot.pdf}
 
 \end{figure}
 
 
-\section{Discussion}
-
-\begin{itemize}
-
-  \item Recommendation about how to use this software: tinkering to get an idea of how patient is responding. After tinkering should do final round of MCMC sampling for most accurate estimates
-  \item How it might be used in clinical settings
-  \item Future directions
-  \item How to modify the functions to adapt to other drugs
-  \item extension to 3 compartment model or nonlinear kinetics (?)
-  \item clincal complications - maybe get Bill's input on how to address the fact that we are dealing with AKI patients and piperacillin is partially renally excreted (caution of using this methodology)
-
-\end{itemize}
 
 
-When comparing the linear (untransformed) interval for target attainment with the logit- and probit-transformed intervals, none of the three stood out as being superior to the others. All intervals performed highly similarly. If anything, the linear interval was slightly closer to the nominal 95\% coverage rate, though only marginally so. Given these negligible differences and the fact that the linear interval can produce credible bounds above 1, which are outside the range of observable values, the \texttt{pkpredict} software uses a logit-transformed interval as the basis for calculations.
 
-Biological considerations should always be considered when using software of this nature. The example presented here monitored response to treatment using piperacillin in acute kidney injury patients being treated for sepsis. The current setup of the Bayesian prediction model assumes that the rates of elimination are constant across time. Piperacillin is, in part, excreted renally, and the fact that patients are simultaneously being treated for AKI could result in time-dependent elimination rates as the patient's kidney function improves or worsens over time. For short-term conditions like sepsis (verify that this is usually ``short term''), drastic changes in kidney function and in turn drastic changes in elimination rates are less likely. This may be a pertinent concern for other more volatile conditions.
-
-% write some stuff here
 
 \section{Appendix: Prior hyperparameters for piperacillin among critically ill}
 \begin{center}

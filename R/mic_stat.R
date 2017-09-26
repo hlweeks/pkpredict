@@ -49,6 +49,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
     # Get PK solution equation evaluated at parameters
     if(inherit.soln){
       soln <- attributes(pkpars)$soln
+      print(soln)
     }else{
       soln <- pk_solution(v_1=exp(pkpars[1]), k_10=exp(pkpars[2]),
                           k_12=exp(pkpars[3]), k_21=exp(pkpars[4]), ivt=ivt)
