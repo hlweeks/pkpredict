@@ -1,12 +1,11 @@
 #' Title
 #'
-#' @param object
-#' @param ...
+#' @param object pkm model object
+#' @param ... other parameters
 #'
-#' @return
+#' @return printed model object
 #' @export
 #'
-#' @examples
 
 print.pkm <- function(object, ...){
   cat("\nCall:\n", paste(deparse(object$call), sep = "\n", collapse = "\n"),

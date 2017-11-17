@@ -10,7 +10,6 @@
 #'
 #' @export
 #'
-#' @examples
 fdGrad <- function (pars, fun, ...,
                     .relStep = (.Machine$double.eps)^(1/2),
                     minAbsPar = 0) {

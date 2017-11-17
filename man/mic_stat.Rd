@@ -7,7 +7,7 @@
 mic_stat(ivt, th, dat = data.frame(), pars = c(lv_1 = 3.223, lk_10 = -1.65,
   lk_12 = -7, lk_21 = -7, lerr = 2.33), cod = 12, timeint = c(0,
   max(sapply(ivt, function(x) x$end)) + cod), conf.level = 0.95,
-  mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL,
+  mcmc = FALSE, nreps = 5000, nburnin = 2000, seed = NULL,
   shiny = FALSE)
 }
 \arguments{

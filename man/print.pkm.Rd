@@ -7,7 +7,12 @@
 \method{print}{pkm}(object, ...)
 }
 \arguments{
-\item{...}{}
+\item{object}{pkm model object}
+
+\item{...}{other parameters}
+}
+\value{
+printed model object
 }
 \description{
 Title

@@ -8,7 +8,6 @@
 #'
 #' @export
 #'
-#' @examples
 
 shiny_pkm <- function(){
   library(pkpredict)

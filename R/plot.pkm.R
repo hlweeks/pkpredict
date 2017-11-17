@@ -7,7 +7,6 @@
 #' @return Concentration-time curve for the fitted pharmacokinetic model
 #' @export
 #'
-#' @examples
 
 plot.pkm <- function(object, alp = 0.05, ...){
   col_bg <- "#AAAAB5"

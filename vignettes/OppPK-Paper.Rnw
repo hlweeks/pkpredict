@@ -4,6 +4,9 @@
 \graphicspath{{./figure/}}
 \newcommand{\mic}{$ft > k \times MIC$}
 
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{}
+
 \title{pkpredict: An R Package to Calculate Individualized Estimates of Pharmacokinetic Performance}
 \author{Hannah L. Weeks, Ryan T. Jarrett, Matthew S. Shotwell} % William H. Fissell?
 

@@ -4,7 +4,7 @@
 \alias{predict.pkm}
 \title{Predict method for PK model}
 \usage{
-\method{predict}{pkm}(object, times)
+\method{predict}{pkm}(object, times = NULL)
 }
 \arguments{
 \item{object}{Object of class "pkm"}
