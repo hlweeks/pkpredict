@@ -16,6 +16,8 @@ and rate of infusion (g/h) at each dose}
 
 \item{th}{Threshold value for effective treatment - check units}
 
+\item{dat}{data}
+
 \item{pars}{Vector of pharmacokinetic parameters of length 5: (log(v_1), log(k_10), log(k_12), log(k_21), log(err))}
 
 \item{cod}{Length of time after end of last dose to consider}
@@ -26,6 +28,14 @@ the statistic is computed. By default covers the full dosing period + \code{cod}
 \item{conf.level}{Desired confidence level of the interval}
 
 \item{mcmc}{logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)}
+
+\item{nreps}{mcmc replications}
+
+\item{nburnin}{mcmc burn in iterations}
+
+\item{seed}{seed for replication}
+
+\item{shiny}{is shiny being used}
 }
 \value{
 Fraction of time spent above the specified threshold from time of first dose through
@@ -34,8 +44,4 @@ Fraction of time spent above the specified threshold from time of first dose thr
 \description{
 Compute an estimate of pharmacodynamic target attainment, typically defined
 to be some multiple of the minimum inhibitory concentration of the infecting microorganism.
-}
-\examples{
-
-
 }

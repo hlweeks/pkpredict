@@ -6,7 +6,6 @@
 #' @return Predicted blood concentration measurements
 #' @export
 #'
-#' @examples
 #'
 
 predict.pkm <- function(object, times = NULL){

@@ -12,7 +12,6 @@
 #' @return The value of the log-likelihood evaluated at the specified log-parameter vector
 #'
 #' @export
-#'
 #' @examples
 #' lpk_mean_d <- c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)
 #' ler_mean_d <- 2.33

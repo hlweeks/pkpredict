@@ -13,20 +13,19 @@
 #' @return Updated PK model
 #' @export
 #'
-#' @examples
 #'
 
 update.pkm <- function(object, formula = NULL, newdat = NULL, newivt = NULL){
   if(is.null(newivt) & is.null(newdat)){stop("At least one of newivt, newdat must be specified")}
 
-  dat <- object$data
+  dta <- object$data
   ivt <- object$infsched
 
   if(!is.null(newdat)){
     if(is.null(formula)){stop("concentration ~ time formula not specified")}
-    dat_add <- model.frame(formula, dat)
+    dat_add <- model.frame(formula, dta)
 
-    dat <- cbind(dat, dat_add)
+    dta <- cbind(dta, dat_add)
   }
 
   if(!is.null(newivt)){
@@ -35,6 +34,6 @@ update.pkm <- function(object, formula = NULL, newdat = NULL, newivt = NULL){
   }
 
   pkm(formula = conc_mcg_ml ~ time_h,
-      dat = dat, ivt = ivt, pars = object$est,
+      data = dta, ivt = ivt, pars = object$est,
       alp = object$alpha, cod = object$cod, thres = object$thresh)
 }

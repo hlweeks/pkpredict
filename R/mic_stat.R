@@ -13,13 +13,16 @@
 #' @param cod Length of time after end of last dose to consider
 #' @param conf.level Desired confidence level of the interval
 #' @param mcmc logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)
+#' @param dat data
+#' @param nreps mcmc replications
+#' @param nburnin mcmc burn in iterations
+#' @param seed seed for replication
+#' @param shiny is shiny being used
 #'
 #' @return Fraction of time spent above the specified threshold from time of first dose through
 #' \code{cod} hours after end of the last dose
 #'
 #' @export
-#'
-#' @examples
 #'
 #'
 
@@ -122,9 +125,9 @@ mic_stat <- function(ivt, th, dat = data.frame(),
     print(class(theta_samples))
     mic_samples <- rep(NA, nrow(theta_samples))
     if(shiny){
-      withProgress(message = 'Computing posterior estimates', value = 0, {
+      shiny::withProgress(message = 'Computing posterior estimates', value = 0, {
                      for(i in 1:nrow(theta_samples)){
-                       incProgress(1/nrow(theta_samples))
+                       shiny::incProgress(1/nrow(theta_samples))
                        mic_samples[i] <- get_stat(theta_samples[i,])
                      }})
     }else{

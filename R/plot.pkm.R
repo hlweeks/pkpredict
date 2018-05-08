@@ -1,8 +1,10 @@
 #' Plot method for PK model
 #'
 #' @param object An object of class \code{pkm}
-#' @param alp Value used to produce (1 - \code{alp})% credible intervals
+#' @param alp Value used to produce (1 - \code{alp})\% credible intervals
 #' @param ... Additional arguments
+#'
+#' @importFrom graphics abline legend lines par plot points polygon
 #'
 #' @return Concentration-time curve for the fitted pharmacokinetic model
 #' @export

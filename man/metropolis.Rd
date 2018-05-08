@@ -6,10 +6,15 @@
 \usage{
 metropolis(theta, ivt, dat, Sigma)
 }
+\arguments{
+\item{theta}{pk parameters}
+
+\item{ivt}{infusion schedule}
+
+\item{dat}{data}
+
+\item{Sigma}{covariance matrix}
+}
 \description{
 Functions needed for MH and MCMC, currently NOT exported.
-}
-\examples{
-
-
 }

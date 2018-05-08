@@ -6,15 +6,11 @@
 #' @param x The value of the number to be converted, or to convert 2 (depending on `forward` argument)
 #' @param mvunits Units of the mass and volume of the data. Must be entered as "mass/volume"
 #' @param forward Boolean. Tells whether or not the conversion is forward (into g/L) or backward (from g/L to original)
-#'
-#' @details
+
 #'
 #' @return posterior estimates
 #' @export
 #'
-#' @examples
-#' # Insert example from Bayes.R
-#' pkm(concentration ~ time, dat_d, ivt_d) # something like this
 
 unit_conversion <- function(x, mvunits, forward = TRUE){
   if(1 - grepl("/", mvunits)){stop("Units must be entered as 'mass/volume'")}

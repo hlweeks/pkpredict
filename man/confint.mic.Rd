@@ -17,6 +17,3 @@ CI
 \description{
 Confidence intervals for ftMIC statistic
 }
-\examples{
-
-}

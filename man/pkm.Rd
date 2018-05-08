@@ -22,13 +22,25 @@ and rate of infusion at each dose}
 
 \item{pars}{Vector of (prior) log-pharmacokinetic parameters of length 5: (lv_1, lk_10, lk_12, lk_21, lerr)}
 
-\item{alp}{Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands}
+\item{alp}{Value of alpha to use for generating pointwise (1 - \code{alp})\% confidence bands}
 
 \item{cod}{Length of time after end of last dose to consider}
 
 \item{thres}{Threshold for effective treatment (mcg/ml)}
 
+\item{timeint}{time interval over which to compute estimate}
+
 \item{mcmc}{logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)}
+
+\item{nreps}{number of MCMC iterations to perform (including burn in)}
+
+\item{nburnin}{number of burn in replications to perform}
+
+\item{seed}{seed for replicating MCMC results}
+
+\item{shiny}{is this being used within shiny_pkm}
+
+\item{...}{other parameters}
 }
 \value{
 posterior estimates
@@ -43,5 +55,5 @@ infusion, hours for times.
 }
 \examples{
 # Insert example from Bayes.R
-pkm(concentration ~ time, dat_d, ivt_d) # something like this
+# pkm(concentration ~ time, dat_d, ivt_d) # something like this
 }

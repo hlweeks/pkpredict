@@ -27,6 +27,3 @@ Update method for PK model
 Update a fitted PK model with either new infusion information, new obseved concentration data,
 or both.
 }
-\examples{
-
-}

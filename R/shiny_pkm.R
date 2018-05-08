@@ -3,6 +3,9 @@
 #' Leave as-is? Or should any values be considered parameters
 #' Currently specific to piperacillin (including some associated text)
 #'
+#' @import shiny shinydashboard rhandsontable
+#'
+#'
 #' @return
 #' Launches an interaction interface for implementing Bayesian pharmacokinetic modeling
 #'
@@ -10,8 +13,6 @@
 #'
 
 shiny_pkm <- function(){
-  library(pkpredict)
-
   # Change the shiny app to only rely on functions/syntax within pkpredict package
 
   ui <- dashboardPage(
@@ -68,7 +69,7 @@ shiny_pkm <- function(){
       actionButton("goPlot", "Update Plot", style = 'padding: 10px; font-size: 20px'),
       HTML('<br/><br/>'),
 
-      numericInput('thres', "Threshold (μg/ml)", value = 64, min = 0, width = '175px'),
+      numericInput('thres', paste0("Threshold (", expression(mu), "g/ml)"), value = 64, min = 0, width = '175px'),
       em("Threshold value is typically some multiple of the minimum inhibitory concentration
          (MIC) for the target microorganism.", style = "font-size: 18px;"),
       HTML('<br/><br/>'),
@@ -128,11 +129,11 @@ shiny_pkm <- function(){
     #rhandsontable for sample information
     output$sample <- renderRHandsontable({
       vec <- numeric(10)
-      sampDF = data.frame("Time (h)" = vec,
-                          "Conc. (μg/ml)" = vec,
+      sampDF = data.frame("Time" = vec,
+                          "Conc" = vec,
                           check.names=FALSE)
       rhandsontable(sampDF, colWidths = c(95, 135), rowHeights = rep(30, 10),
-                    colHeaders = c("Time (h)", "Conc. (μg/ml)"))
+                    colHeaders = c("Time (h)", paste0("Conc. (",expression(mu),"g/ml)")))
     })
 
 
@@ -220,7 +221,7 @@ shiny_pkm <- function(){
       #Display coordinates when hovering over a point
       output$info <- renderText({
         paste("Time=", round(input$plot_hover$x,2), "h",
-              "\nConcentration=", round(input$plot_hover$y,2), "μg/ml", sep=" ")
+              "\nConcentration=", round(input$plot_hover$y,2), paste0(expression(mu),"g/ml"), sep=" ")
       })
     })
 

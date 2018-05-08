@@ -1,12 +1,12 @@
 #'
 #' Functions needed for MH and MCMC, currently NOT exported.
 #'
-#'
-#'
-#'
-#' @examples
-#'
-#'
+#' @param theta pk parameters
+#' @param ivt infusion schedule
+#' @param dat data
+#' @param Sigma covariance matrix
+
+
 
 
 metropolis <- function(theta, ivt, dat, Sigma){
@@ -41,10 +41,10 @@ metro_iterate <- function(nreps = 1000,
   accept.count = 1
 
   if(shiny){
-    withProgress(message = 'Sampling from the posterior distribution', value = 0, min = 0, max = 1,
+    shiny::withProgress(message = 'Sampling from the posterior distribution', value = 0, min = 0, max = 1,
                  {for(n in 2:nreps){
                      if(n %% 250 == 0){
-                       incProgress(250/nreps)
+                       shiny::incProgress(250/nreps)
                      }
 
                      theta[n,] <- metropolis(theta[n-1,], ivt, dat, Sigma)

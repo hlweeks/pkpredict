@@ -17,6 +17,3 @@ Predicted blood concentration measurements
 \description{
 Predict method for PK model
 }
-\examples{
-
-}

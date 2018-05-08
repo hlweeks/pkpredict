@@ -1,16 +1,16 @@
 Package: pkpredict
 Title: Compartment Model Implementation for Pharmacokinetic Analysis
 Version: 0.0.1
-Authors@R: c(person("Matthew", "Shotwell", email = "matt.shotwell@vanderbilt.edu", role = c("aut")),
-             person("Hannah", "Weeks", email = "hannah.weeks@vanderbilt.edu", role = c("aut", "cre")))
-Description: Contains functions to perform analyses associated with pharmacokinetic modeling. 
- (Further explanation required) 
-Depends: R (>= 3.3.2), mvtnorm, shiny, shinydashboard, rhandsontable
-Imports: stats, graphics
+Author: Matthew Shotwell [aut],
+  Hannah Weeks [aut,cre]
+Maintainer: Hannah Weeks <hannah.weeks@vanderbilt.edu>
+Description: Contains functions to perform analyses associated with pharmacokinetic modeling in a Bayesian framework.
+Depends: R (>= 3.3.2), mvtnorm
+Imports: stats, shiny, shinydashboard, rhandsontable
 URL: https://github.com/hlweeks/pkpredict
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Suggests: testthat, knitr
+Suggests: knitr, xtable
 VignetteBuilder: knitr

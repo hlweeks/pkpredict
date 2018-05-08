@@ -6,7 +6,7 @@
 \newcommand{\mic}{$ft > k \times \text{MIC }$}
 
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{}
+%\VignetteIndexEntry{\texttt{pkpredict}: An R Package to Calculate Individualized Estimates of Pharmacokinetic Performance}
 
 \title{\texttt{pkpredict}: An R Package to Calculate Individualized Estimates of Pharmacokinetic Performance}
 \author{Hannah L. Weeks, Ryan T. Jarrett, Matthew S. Shotwell} % William H. Fissell?
@@ -17,8 +17,6 @@
 
 <<echo = F, message = F>>=
 # Other needed packages
-library(xtable)
-library(ggplot2)
 library(shiny)
 library(shinydashboard)
 library(rhandsontable)
@@ -306,7 +304,7 @@ inf_df <- data.frame("Begin (h)" = start_times,
                      "Infusion Rate (g/h)" = rate_of_infusion,
                      check.names = FALSE)
 
-print(xtable(inf_df, digits = 1, caption = "Sample Infusion Schedule"),
+print(xtable::xtable(inf_df, digits = 1, caption = "Sample Infusion Schedule"),
       caption.placement = "top", include.rownames = FALSE)
 @
 
@@ -321,7 +319,7 @@ dat_d <- data.frame("time" = c(1, 4, 40),
 
 <<echo = FALSE, results = 'asis'>>=
 names(dat_d) <- c("Time (h)", "Concentration (mcg/mL)")
-print(xtable(dat_d, digits = 1, caption = "Sample Data (observed from blood draws)"),
+print(xtable::xtable(dat_d, digits = 1, caption = "Sample Data (observed from blood draws)"),
       caption.placement = "top", include.rownames = FALSE)
 names(dat_d) <- c("time", "con")
 @
@@ -378,8 +376,8 @@ names(pred.df) <- c("Time Since First Infusion (h)", "Concentration (mcg/mL)", "
 @
 
 <<echo = FALSE, results = 'asis'>>=
-xdf <- xtable(pred.df, digits = 2, caption = "Predicted Values")
-align(xdf) <- rep('c', 4)
+xdf <- xtable::xtable(pred.df, digits = 2, caption = "Predicted Values")
+xtable::align(xdf) <- rep('c', 4)
 print(xdf, caption.placement = "top", include.rownames = FALSE)
 @
 

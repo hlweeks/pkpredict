@@ -3,7 +3,7 @@
 #' Fits a two-compartment model to obtain posterior estimates of concentration of drug
 #' over time.
 #'
-#' @import stats graphics
+#' @import stats
 #'
 #' @param formula A formula where the left side is the measured concentration of drug
 #' and the right side is the times of concentration measurements
@@ -12,11 +12,17 @@
 #' @param pars Vector of (prior) log-pharmacokinetic parameters of length 5: (lv_1, lk_10, lk_12, lk_21, lerr)
 #' @param ivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose
-#' @param alp Value of alpha to use for generating pointwise (1 - \code{alp})% confidence bands
+#' @param alp Value of alpha to use for generating pointwise (1 - \code{alp})\% confidence bands
 #' @param cod Length of time after end of last dose to consider
 #' @param thres Threshold for effective treatment (mcg/ml)
 #' @param mcmc logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)
 #'
+#' @param timeint time interval over which to compute estimate
+#' @param nreps number of MCMC iterations to perform (including burn in)
+#' @param nburnin number of burn in replications to perform
+#' @param seed seed for replicating MCMC results
+#' @param shiny is this being used within shiny_pkm
+#' @param ... other parameters
 #'
 #' @details Measurements must be entered in particular units: mcg/ml for concentrations, g/h in rate of
 #' infusion, hours for times.
@@ -26,7 +32,7 @@
 #'
 #' @examples
 #' # Insert example from Bayes.R
-#' pkm(concentration ~ time, dat_d, ivt_d) # something like this
+#' # pkm(concentration ~ time, dat_d, ivt_d) # something like this
 
 pkm <- function(formula, data, subset, ivt,
                 pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),

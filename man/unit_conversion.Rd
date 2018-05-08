@@ -19,10 +19,3 @@ posterior estimates
 \description{
 Converts units for compatibility with package functions.
 }
-\details{
-
-}
-\examples{
-# Insert example from Bayes.R
-pkm(concentration ~ time, dat_d, ivt_d) # something like this
-}

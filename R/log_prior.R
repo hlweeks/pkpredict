@@ -18,6 +18,8 @@
 #'
 #' @return The value of the log-prior evaluated at the specified log-parameter vector
 #'
+#' @export
+#'
 #' @examples
 #' # Default parameter values based on prior study
 #' lpk_mean_d <- c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)
@@ -30,8 +32,7 @@
 #'
 #' lpr_d  <- c(lpk_mean_d, ler_mean_d)
 #' log_prior(lpr_d, lpk_mean_d, lpk_vcov_d, ler_mean_d, ler_sdev_d)
-#'
-#' @export
+
 
 
 log_prior <- function(lpr, mu = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7),

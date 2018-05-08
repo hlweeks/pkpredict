@@ -44,5 +44,4 @@ ler_sdev_d <- 0.32
 
 lpr_d  <- c(lpk_mean_d, ler_mean_d)
 log_prior(lpr_d, lpk_mean_d, lpk_vcov_d, ler_mean_d, ler_sdev_d)
-
 }

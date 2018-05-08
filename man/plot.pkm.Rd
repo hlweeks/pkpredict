@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of class \code{pkm}}
 
-\item{alp}{Value used to produce (1 - \code{alp})% credible intervals}
+\item{alp}{Value used to produce (1 - \code{alp})\% credible intervals}
 
 \item{...}{Additional arguments}
 }
