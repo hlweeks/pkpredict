@@ -8,7 +8,7 @@
 #'
 #'
 
-predict.pkm <- function(object, times = NULL){
+predict.pkm <- function(object, times = NULL, ...){
 
   # Parameter estimates from fitted pkm model
   est <- object$est

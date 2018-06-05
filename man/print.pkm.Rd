@@ -4,15 +4,15 @@
 \alias{print.pkm}
 \title{Title}
 \usage{
-\method{print}{pkm}(object, ...)
+\method{print}{pkm}(x, ...)
 }
 \arguments{
-\item{object}{pkm model object}
+\item{x}{pkm model x}
 
 \item{...}{other parameters}
 }
 \value{
-printed model object
+printed model x
 }
 \description{
 Title

@@ -4,12 +4,16 @@
 \alias{confint.mic}
 \title{Confidence intervals for ftMIC statistic}
 \usage{
-\method{confint}{mic}(ftmic, conf.level = 0.95)
+\method{confint}{mic}(object, parm, level, ...)
 }
 \arguments{
-\item{ftmic}{"mic" object obtained from \code{mic_stat}}
+\item{object}{"mic" object obtained from \code{mic_stat}}
 
-\item{conf.level}{Desired confidence level of the interval}
+\item{parm}{which parameters should be given confidence intervals}
+
+\item{level}{Desired confidence level of the interval}
+
+\item{...}{other arguments}
 }
 \value{
 CI

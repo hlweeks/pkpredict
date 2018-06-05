@@ -1,6 +1,6 @@
 #' Plot method for PK model
 #'
-#' @param object An object of class \code{pkm}
+#' @param x An object of class \code{pkm}
 #' @param alp Value used to produce (1 - \code{alp})\% credible intervals
 #' @param ... Additional arguments
 #'
@@ -10,19 +10,19 @@
 #' @export
 #'
 
-plot.pkm <- function(object, alp = 0.05, ...){
+plot.pkm <- function(x, alp = 0.05, ...){
   col_bg <- "#AAAAB5"
   col_fg <- "#3E465A"
 
   #############
-  est <- object$optim
-  ivt <- object$infsched
-  cod <- object$cod
+  est <- x$optim
+  ivt <- x$infsched
+  cod <- x$cod
 
   ## Compute plotting times
   ## - ensure peak and trough times
   ## - avoid time zero
-  tms <- sapply(ivt, function(x) c(x$begin, x$end))
+  tms <- sapply(ivt, function(y) c(y$begin, y$end))
   tms <- c(tms, max(tms)+cod)
   tms <- unlist(sapply(1:(length(tms)-1), function(i) {
     s1 <- seq(tms[i], tms[i+1], 1/10)
@@ -65,7 +65,7 @@ plot.pkm <- function(object, alp = 0.05, ...){
   lines(tms, con, lwd=2, col=col_fg)
 
   ## Plot measured points
-  dat <- object$data
+  dat <- x$data
   if(nrow(dat) > 0){
     points(dat$time_h, dat$conc_mcg_ml, pch=16)
   }
@@ -76,8 +76,8 @@ plot.pkm <- function(object, alp = 0.05, ...){
          border=NA, bty='n')
 
   #Plotting elements for mic statistic
-  ftmic <- object$ftmic
-  thres <- object$thresh
+  ftmic <- x$ftmic
+  thres <- x$thresh
   abline(h = thres, lty = 2)
   legend("topright", bty = 'n',
          legend = c(paste("fT > threshold:", round(ftmic$ftmic, 3)),

@@ -13,14 +13,20 @@
 #' @export
 #'
 
-log_posterior <- function(lpr, ivt, dat) {
+log_posterior <- function(lpr, ivt, dat,
+                          mu = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7),
+                          sig = 300 * matrix(c(   0.00167,  -0.00128,      0,      0,
+                                                  -0.00128,   0.00154,      0,      0,
+                                                  0,         0, .00015,      0,
+                                                  0,         0,      0, .00015), 4, 4),
+                          ler_mean = 2.33, ler_sdev = 0.32) {
   dat <- na.omit(dat)
 
   if(nrow(dat) < 1) {
     log_prior(lpr)
   } else {
     log_like <- log_likelihood(lpr, ivt, dat)
-    res <- log_prior(lpr) + log_like
+    res <- log_prior(lpr, mu=mu, sig=sig, ler_mean=ler_mean, ler_sdev=ler_sdev) + log_like
     attr(res, "soln") <- attributes(log_like)$soln
     res
   }

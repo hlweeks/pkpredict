@@ -18,6 +18,10 @@
 #' @param nburnin mcmc burn in iterations
 #' @param seed seed for replication
 #' @param shiny is shiny being used
+#' @param mu prior pk param mean
+#' @param sig prior pk param vcov matrix
+#' @param ler_mean prior error dist mean
+#' @param ler_sdev prior error dist sd
 #'
 #' @return Fraction of time spent above the specified threshold from time of first dose through
 #' \code{cod} hours after end of the last dose
@@ -28,6 +32,12 @@
 
 mic_stat <- function(ivt, th, dat = data.frame(),
                      pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
+                     mu = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7),
+                     sig = 300 * matrix(c(   0.00167,  -0.00128,      0,      0,
+                                             -0.00128,   0.00154,      0,      0,
+                                             0,         0, .00015,      0,
+                                             0,         0,      0, .00015), 4, 4),
+                     ler_mean = 2.33, ler_sdev = 0.32,
                      cod = 12, timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
                      conf.level = .95, mcmc = FALSE, nreps = 5000, nburnin = 2000, seed = NULL, shiny = FALSE){
 
@@ -45,7 +55,10 @@ mic_stat <- function(ivt, th, dat = data.frame(),
   tms <- pmax(1e-3, tms)
 
   # Only changes pars if nrow(dat) > 0 (default is prior: dat is empty)
-  est <- optim(pars, log_posterior, ivt = ivt, dat = dat,
+  est <- optim(pars, log_posterior,
+               ivt = ivt, dat = dat,
+               mu = mu, sig = sig,
+               ler_mean = ler_mean, ler_sdev = ler_sdev,
                control = list(fnscale=-1), hessian=TRUE)
 
   get_stat <- function(pkpars, inherit.soln = FALSE){

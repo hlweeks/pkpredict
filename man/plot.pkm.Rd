@@ -4,10 +4,10 @@
 \alias{plot.pkm}
 \title{Plot method for PK model}
 \usage{
-\method{plot}{pkm}(object, alp = 0.05, ...)
+\method{plot}{pkm}(x, alp = 0.05, ...)
 }
 \arguments{
-\item{object}{An object of class \code{pkm}}
+\item{x}{An object of class \code{pkm}}
 
 \item{alp}{Value used to produce (1 - \code{alp})\% credible intervals}
 

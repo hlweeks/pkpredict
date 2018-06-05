@@ -12,8 +12,8 @@
 metropolis <- function(theta, ivt, dat, Sigma){
   thetastar <- rmvnorm(1, theta, Sigma)
 
-  post_tstar <- log_posterior(lpr = thetastar, ivt = ivt_d, dat = dat)
-  post_theta <- log_posterior(lpr = theta, ivt = ivt_d, dat = dat)
+  post_tstar <- log_posterior(lpr = thetastar, ivt, dat = dat)
+  post_theta <- log_posterior(lpr = theta, ivt, dat = dat)
 
   lratio = post_tstar - post_theta
 
