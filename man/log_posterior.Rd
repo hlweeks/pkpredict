@@ -16,6 +16,14 @@ log_posterior(lpr, ivt, dat, mu = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7,
 and rate of infusion (g/h) at each dose}
 
 \item{dat}{Concentration data frame of the form: data.frame(time_h, conc_mg_dl)}
+
+\item{mu}{prior pk param mean}
+
+\item{sig}{prior pk vcov matrix}
+
+\item{ler_mean}{prior error mean}
+
+\item{ler_sdev}{prior error sd}
 }
 \value{
 The log-posterior distribution evaluated at the specified log-parameter vector

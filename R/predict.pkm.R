@@ -2,6 +2,7 @@
 #'
 #' @param object Object of class "pkm"
 #' @param times Times at which predictions of blood concentration measurements are desired
+#' @param ... other params
 #'
 #' @return Predicted blood concentration measurements
 #' @export

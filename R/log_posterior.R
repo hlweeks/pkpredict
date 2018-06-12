@@ -7,6 +7,10 @@
 #' @param ivt List with containing start of infusion times (h), end of infusion times (h),
 #' and rate of infusion (g/h) at each dose
 #' @param dat Concentration data frame of the form: data.frame(time_h, conc_mg_dl)
+#' @param mu prior pk param mean
+#' @param sig prior pk vcov matrix
+#' @param ler_mean prior error mean
+#' @param ler_sdev prior error sd
 #'
 #' @return The log-posterior distribution evaluated at the specified log-parameter vector
 #'

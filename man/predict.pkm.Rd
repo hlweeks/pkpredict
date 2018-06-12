@@ -10,6 +10,8 @@
 \item{object}{Object of class "pkm"}
 
 \item{times}{Times at which predictions of blood concentration measurements are desired}
+
+\item{...}{other params}
 }
 \value{
 Predicted blood concentration measurements

@@ -6,6 +6,7 @@
 #' @param newdat Data frame with concentration data (time of measurement in hours and concentration in mcg/ml)
 #' @param newivt List with containing start of infusion times, end of infusion times,
 #' and rate of infusion at each dose for which predictions will be obtained
+#' @param ... other params
 #'
 #' @details Update a fitted PK model with either new infusion information, new obseved concentration data,
 #' or both.
@@ -15,7 +16,7 @@
 #'
 #'
 
-update.pkm <- function(object, formula = NULL, newdat = NULL, newivt = NULL){
+update.pkm <- function(object, formula = NULL, newdat = NULL, newivt = NULL, ...){
   if(is.null(newivt) & is.null(newdat)){stop("At least one of newivt, newdat must be specified")}
 
   dta <- object$data

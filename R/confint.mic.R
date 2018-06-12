@@ -16,7 +16,7 @@ confint.mic <- function(object, parm, level, ...){
   est <- object$ftmic
 
   # SE of logit(statistic)
-  grd_mic <- fdGrad(ftobjectmic$pars, function(pars) {
+  grd_mic <- fdGrad(object$pars, function(pars) {
     #try extracting the est object and going direct to the time>mic computation?
     #the optim function might be what's making this take a few seconds to run
     #the optim function is the difference between bayes.R and this

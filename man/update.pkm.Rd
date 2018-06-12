@@ -4,7 +4,8 @@
 \alias{update.pkm}
 \title{Update method for PK model}
 \usage{
-\method{update}{pkm}(object, formula = NULL, newdat = NULL, newivt = NULL)
+\method{update}{pkm}(object, formula = NULL, newdat = NULL, newivt = NULL,
+  ...)
 }
 \arguments{
 \item{object}{An object of class "pkm}
@@ -16,6 +17,8 @@ and the right side is the times of concentration measurements}
 
 \item{newivt}{List with containing start of infusion times, end of infusion times,
 and rate of infusion at each dose for which predictions will be obtained}
+
+\item{...}{other params}
 }
 \value{
 Updated PK model
