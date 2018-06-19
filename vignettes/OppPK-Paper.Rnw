@@ -52,28 +52,28 @@ library(rhandsontable)
 Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as piperacillin and ciprofloxacin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure). As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
 %**\cite{Shotwell2015, Shotwell2016} - need to sort out bibtex
 
-For an individual patient, pharmacokinetic uncertianty can be reduced by measuring drug concentration in the blood over time and assessing patient response through therapeutic drug monitoring. These data can be used to estimate current and past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurements of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
+For an individual patient, pharmacokinetic uncertianty can be reduced through therapeutic drug monitoring (TDM). TDM involves measuring drug concentration in the blood over time and using these values to assess whether a patient is receiving the appropriate amount of the drug. This information can be used to estimate current and past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurements of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
 
 
 
 
 
 
-We implement Bayesian methods using pharmacokinetic data from a prior study to provide posterior estimates of individual target attainment Due to significant pharmacokinetic heterogeneity, measures of statistical uncertainty about target attainment are critical for understanding response to treatment at the patient level, and for clinical decision-making. We summarize this statistical uncertainty by computing and presenting 95\% credible intervals for patient-specific estimates of target attainment However, in order for these methods to be practical, it is necessary that computation can occur in real time. Due to the computational intensity of exact methods (e.g., Markov chain Monte Carlo), we sought to identify statistical approximations that are both accurate with regard to quantification of statistical uncertainty (i.e., the effective level of the approximate credible interval closely matches the nominal level, 95\%) while also being computationally feasible to implement with no significant delay (e.g., via a web application). We accomplish this by using a series of statistical approximations paired with a web application that renders these techniques accessible to, for example, a practicing physician. We present assessments of the accuracy and computational efficiency for this approach.
+We implement Bayesian methods using pharmacokinetic data from a prior study to provide posterior estimates of individual target attainment. Due to significant pharmacokinetic heterogeneity, measures of statistical uncertainty about target attainment are critical for understanding response to treatment at the patient level, and for clinical decision-making. We summarize this statistical uncertainty by computing and presenting 95\% credible intervals for patient-specific estimates of target attainment However, in order for these methods to be practical, it is necessary that computation can occur in real time. Due to the computational intensity of exact methods (e.g., Markov chain Monte Carlo), we sought to identify statistical approximations that are both accurate with regard to quantification of statistical uncertainty (i.e., the effective level of the approximate credible interval closely matches the nominal level, 95\%) while also being computationally feasible to implement with no significant delay (e.g., via a web application). We accomplish this by using a series of statistical approximations paired with a web application that renders these techniques accessible to, for example, a practicing physician. We present assessments of the accuracy and computational efficiency for this approach.
 
 
 
 
 \section{Methods}
 \subsection{Two-compartment model}
-The two-compartment model is the most commonly used to model pharmacokinetic processes. It is expressed as a system of two ordinary differential equations as follows, where $m_1$ and $m_2$ are the masses of drug in the central and peripheral compartments, respectively.
+The two-compartment model is the most commonly used to model pharmacokinetic processes for intraevenously infused drugs. It is expressed as a system of two ordinary differential equations as follows, where $m_1$ and $m_2$ are the masses of drug in the central and peripheral compartments, respectively.
 
 \begin{align}
 \frac{dm_1}{dt} &= -k_{10}m_1 - k_{12}m_1 + k_{21}m_2 + k_R \nonumber \\
 \frac{dm_2}{dt} &= \phantom{-k_{10}m_1} + k_{12}m_1 - k_{21}m_2 \nonumber
 \end{align}
 
-The concentration of drug in the central compartment is given by $c_1 = m_1/v_1$, where $v_1$ is the volume of the central compartment. The parameters $k_{10}$, $k_{12}$, $k_{21}$, and $k_R$ are described in Table \ref{tab:pkpars}
+The concentration of drug in the central compartment is given by $c_1 = m_1/v_1$, where $v_1$ is the volume of the central compartment. The parameters $k_{10}$, $k_{12}$, $k_{21}$, and $k_R$ are described in Table \ref{tab:pkpars}. Drugs administered in an alternative fashion (e.g. orally or via bolus injection) may be modelled differently, and thus have pharmacokinetic parameters different from those presented here.
 
 \begin{table}[h]
 \begin{tabular}{lll} \hline
@@ -88,7 +88,7 @@ $v_1$  & L & Volume of central compartment\\
 \caption{Two-compartment model parameter units (SI) and descriptions. \label{tab:pkpars}}
 \end{table}
 
-When assessing patient response to treatment by measuring target attainment, dosing for a patient needs to be enough that the concentration in the blood remains above the necessary threshold for suppression of the offending microorganism, yet not so high as to increase the risk of adverse side effects including toxicity. Typically, a multiple of the minimum inhibitory concentration is used for such measurements, since drug concentration is attenuated at infection sites relative to the bloodstream. A specific pharmacodynamic target is usually outlined. \\
+When assessing patient response to treatment by measuring target attainment, dosing for a patient needs to be enough that the concentration in the blood remains above the necessary threshold for suppression of the offending microorganism, yet not so high as to increase the risk of adverse side effects including toxicity. Typically, a multiple of the minimum inhibitory concentration is used for such measurements, since drug concentration is attenuated at infection sites relative to the bloodstream. Other measures of target attainment can be used, including area under the concentration-time curve (AUC) and pharmacokinetic clearance (CL). (Craig et al., 1993) A value or range is typically specified as the desired pharmacodynamic target.  \\
 
 
 
@@ -117,8 +117,8 @@ In the current context, the prior distribution is generated to satisfy the follo
 Due to the nonlinearity of the two-compartment model, the posterior distribution does not take a familiar form, and posterior summaries must be approximated. In particular, we sought to compute 95\% credible bands for subject-specific concentration-time curves, and for target attainment. Monte Carlo techniques are often used to approximate these quantities. However, because these posterior summaries are presented in a web application in real time, we sought alternatives that were less computationally intensive and deterministic.
 
 
-\subsubsection{Approximation methods}
-We considered a method that makes use of two approximations. The first is a Laplace approximation to the subject-specific posterior density, and the second is a first order Taylor approximation of the target summary (i.e., the `delta method'). The Laplace approximation is given as follows
+\subsubsection{Approximation method}
+We considered a method that makes use of a Laplace approximation to the subject-specific posterior density. The further use a first order Taylor approximation of the target summary (i.e., the `delta method') to obtain approximate standard errors for generating interval estimates. The Laplace approximation is given as follows
 \begin{align}
 &\pi_i(\log \theta_i, \log \sigma) \approx N([\log \hat{\theta}_i,\log \hat{\sigma}], [-H_{\hat{\theta}_i}]^{-1})
 \end{align}
@@ -132,6 +132,9 @@ We considered a method that makes use of two approximations. The first is a Lapl
 \end{align}
 \noindent An approximate $(1-\alpha)\cdot 100$\% credible interval for $h(\log \theta_i)$ is thus given by the $\alpha/2$ and $(1-\alpha)/2$ quantiles of the approximate posterior distribution for $h(\log \theta_i)$. This method is computationally elegant, since the posterior Hessian and posterior mode can be computed simultaneously by most optimization software routines (e.g., the R function \texttt{optim}).
 
+We considered several possible functional forms of $h(\log \theta_i)$ for \mic: logit-transformed, probit-transformed, and identity intervals (further referred to as the linear interval). Logit- and probit-transformed intervals restrict the computed confidence interval boundaries to be between 0 and 1. Identity (untransformed) intervals can yield bounds outside the interval boundaries, in which case the corresponding confidence limit is truncated. The linear 95\% credible interval is computed as $\hat{\theta}_i \pm z_{0.975} SE(\hat{\theta}_i)$. Standard errors for the transformed intervals are computed using the delta method, as described above.
+
+
 % 2.1: Talk about how the solution to the two compartment model is found - analytical expression put together in piecewise fashion ("not doing numerical solution"), m_1(t), m_2(t)
 % 2.2: talk about two-compartment solution ("FOR THE CENTRAL COMPARTMENT CONCENTRATION"). eta in the statistical model is essentially m_1(t) (eta always the central compartment)
 % Clarify that "elegant solution" is numerical approximation to Hessian
@@ -141,13 +144,12 @@ We considered a method that makes use of two approximations. The first is a Lapl
 % Not sure what to call this section
 \subsection{Application to particular medicine}
 
-In the results shown below and following section, we evaluate our approximation method and demonstrate how to implement this methodology in the context of monitoring patients being treated with piperacillin for acute kidney injury. Pharmacodynamic target attainment is measured as the fraction of the dosing period for which the concentration of drug in the blood is above a specified threshold. Usually, this threshold is a multiple of a minimum inhibitory concentration (denoted \mic), or the amount of the drug required to suppress a particular microorganism in a particular infection site. This particular summary of target attainment is useful for antibiotics that have time-dependent effectiveness. Other summaries, such as the peak concentration, may be useful for antibiotics with concentration-dependent effectiveness. In this instance, we use a target attainment threshold of 64 $\mu$g/mL, with $k=4$ in \mic. In the current context, and by default in the \texttt{pkpredict} package, the hyperparameters of the prior distribution are specified to correspond with estimates that arose from a study of piperacillin pharmacokinetics in a hospitalized, critically ill population. The associated prior parameters are listed in an appendix.
+In the results shown below and following section, we evaluate our approximation method and demonstrate how to implement this methodology in the context of monitoring patients being treated with piperacillin for acute sepsis. Pharmacodynamic target attainment is measured as the fraction of the full observation period for which the concentration of drug in the blood is above a specified threshold. The full observation period is defined from the time of first infusion until a set time after the last infusion (just before the next infusion would hypothetically begin). Usually, this threshold is a multiple of a minimum inhibitory concentration (denoted \mic), or the amount of the drug required to suppress a particular microorganism in a particular infection site. This particular summary of target attainment is useful for antibiotics that have time-dependent effectiveness. Other summaries, such as the peak concentration, may be useful for antibiotics with concentration-dependent effectiveness. (Craig et al., 1993) In this instance, we use a target attainment threshold of 64 $\mu$g/mL, with $k=4$ in \mic. In the current context, and by default in the \texttt{pkpredict} package, the hyperparameters of the prior distribution are specified to correspond with estimates that arose from a study of piperacillin pharmacokinetics in a hospitalized, critically ill population. The associated prior parameters are listed in an appendix. These values can and should be modified to fit the appropriate population for the problem under study.
 
 
-We measure \mic by calculating a simple proportion of the time during the observation period above the desired threshold. By default, the method considers the conclusion of the full observation period to be the time at which the patient would receive their next infusion. This is determined by the dosing regimen administered by the physician. For example, if a patient is receiving 5 iterations of a 30 minute infusion every 8 hours, the dosing window would conclude 8 hours after the fifth infusion begins. We use a bisection root-finding method to identify the times at which the patient's concentration-time curve crosses the threshold. Drug concentration increases if and only if the drug is actively being infused intravenously. Once the IV is removed, the drug concentration can only decrease. Thus, the adjacent time points at which one infusion ends and the next begins (and vice versa) are used as endpoints in the bisection process.Time 0 is taken to be the time of first drug infusion. This method assumes that the concentration of drug in the patient's body is 0$\mu$g/mL at time 0.
+We measure \mic by calculating a simple proportion of the time during the observation period above the desired threshold. By default, the method considers the conclusion of the full observation period to be the time at which the patient would have received their next infusion. This is determined by the dosing regimen administered by the physician. For example, if a patient is receiving 3 grams of a 30 minute infusion every 8 hours, the full observation period would conclude 8 hours after the final infusion begins. We use a bisection root-finding method to identify the times at which the patient's concentration-time curve crosses the threshold. Drug concentration in the central compartment increases if and only if the drug is actively being infused intravenously. Once the IV is removed, the drug concentration can only decrease. Thus, the adjacent time points at which one infusion ends and the next begins (and vice versa) are used as endpoints in the bisection process.Time 0 is taken to be the time of first drug infusion. This method assumes that the concentration of drug in the patient's body is 0$\mu$g/mL at time 0.
 
 
-We considered several possible types of approximate intervals for \mic: logit-transformed, probit-transformed, and untransformed intervals (further referred to as the linear interval). Logit- and probit-transformed intervals restrict the computed confidence interval boundaries to be between 0 and 1. Untransformed intervals can yield bounds outside the interval boundaries, in which case the corresponding confidence limit is truncated. The linear 95\% credible interval is computed as $\hat{\theta}_i \pm z_{0.975} SE(\hat{\theta}_i)$. Gradients for the transformed intervals are computed using the delta method, as described in section 2.2.1.
 
 \subsection{Evaluation of approximation method}
 
@@ -184,7 +186,7 @@ spf(miqr_probit*100)
 
 On 1,000 samples with a linear interval for \mic, we calculated a median posterior coverage of 89.7\% with an IQR from 87.4\% to 91.8\% (\ref{tab:res}). Thus, the approximate intervals are anticonservative relative to the nominal 95\% expected coverage. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the linear scale was used. For the logit-transformed interval, the Bayesian coverage had a median (IQR bounds) of 89.1\% (86.5\%, 91.2\%) and the probit-transformed interval had 89.1\% (86.7\%, 91.3\%).
 
-The results presented here indicate that using Laplace and delta method approximations results in posterior intervals that do not contain the stated 95\% of the posterior density. All three approximate intervals were slightly anticonservative, and tended to include almost 90\% of the posterior density. While these approximation methods yield interval estimates that are silghlty anti-conservative, they are relatively close to nominal and can be useful for quick calculation of approximate patient performance. We suggest using the approximate intervals to obtain rough estimates for various dosing cycles, i.e. in more of an exploratory manner. Rather than directly using these approximate intervals, we recommend that an exact posterior interval obtained via MCMC sampling be used for clinical decision making. The following example demonstrates how the \texttt{pkpredict} package facilitates clinical decision making in the recommended manner.
+All three approximate intervals were slightly anticonservative, and tended to include almost 90\% of the posterior density. While these approximation methods yield interval estimates that are silghlty anti-conservative, they are relatively close to nominal and can be useful for quick calculation of approximate patient performance. We suggest using the approximate intervals to obtain rough estimates for various dosing cycles, i.e. in more of an exploratory manner. Rather than directly using these approximate intervals, we recommend that an exact posterior interval obtained via MCMC sampling be used for clinical decision making. The following example demonstrates how the \texttt{pkpredict} package facilitates clinical decision making in the recommended manner.
 
 As previously discussed in section 2.2.2, these results and the example in the following section are specific to piperacillin and the specific measurement of target attainment being studied. Generalizations could be make to the code in the \texttt{pkpredict} package to extend these methods to other contexts. In order to apply this methodology to another drug, an important consideration is specification of the prior distribution. Hyperparameters can be estimated from previously conducted studies, as was done in our case with piperacillin. This may include not only changes to the parameter values themselves, but also to the PK/PD model (from a two comparment model to an $n$-compartment model, e.g.). This could particularly be necessary when considering drugs administered through bolus injections or orally, rather than intravenously. Alternative measures of pharmacodynamic target attainment could also be coded and substituted for the \texttt{mic_stat} function within the \texttt{pkpredict} package.
 
@@ -286,7 +288,7 @@ library(pkpredict)
 \subsection{Sample infusion schedule and concentation data}
 %Package functions: \texttt{ivt\_toList}
 
-We have a vector of start times for five doses in hours since first infusion, and the duration of each dose. In this case, the duration is the same for each dose: half an hour. The rate of infusion is 6 g/h for all administered doses. Alternatively, the \texttt{ivt\_toList} function can take start and end dosing times rather than start times and duration.
+We have a vector of start times for five doses in hours since the start of first infusion, and the duration of each dose. In this case, the duration is the same for each dose: half an hour. The rate of infusion is 6 g/h for all administered doses (3 grams total). Alternatively, the \texttt{ivt\_toList} function can take start and end dosing times rather than start times and duration.
 <<>>=
 # Time in hours since first infusion
 start_times <- c(0, 8, 16, 24, 32)
@@ -328,10 +330,9 @@ names(dat_d) <- c("time", "con")
 \subsection{MIC estimates}
 %package functions: \texttt{mic_stat}
 
-First, we obtain a prior estimate of target attainment based on the infusion schedule outlined above. By default, the \texttt{mic\_stat} function calculates the $fT > 4 \times MIC$, using a threshold of 64 $\mu$g/mL for piperacillin. The dosing window is assumed to end 12 hours after the end of the final infusion, and can be customized if desired.
+First, we obtain a prior estimate of target attainment based on the infusion schedule outlined above. By default, the \texttt{mic\_stat} function calculates the $fT > 4 \times MIC$, using a threshold of 64 $\mu$g/mL for piperacillin. The dosing window is assumed to end 8 hours after the end of the final infusion, and can be customized if desired with the `cod` argument.
 <<>>=
 # Threshold is in mcg/mL (same scale as observed data)
-# By default, considering time through 12 hours after end of the final dose
 
 # Prior estimate
 prior_ft.mic <- mic_stat(ivt = ivt_d, th = 64)
@@ -421,16 +422,17 @@ shiny_pkm()
 \begin{tabular}{lll} \hline
 Parameter & Value \\ \hline
 log($\mu_0$) & = (lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)\\
-$\Sigma_0$ & $\sim$ 300 $\times$ $\begin{bmatrix} 0.00167 & -0.00128 & 0 & 0\\
+log($\Sigma_0$) & $\sim$ 300 $\times$ $\begin{bmatrix} 0.00167 & -0.00128 & 0 & 0\\
                                 -0.00128 & 0.00154 &      0 &      0 \\
                                        0 &       0 & .00015 &      0 \\
                                        0 &       0 &      0 & .00015)\end{bmatrix}$ \\ % log?
 \hline
+log($\sigma$) & ~ N(2.33, 0.32)\\
+\hline
 \end{tabular}
-\caption{Prior hyperparameters for piperacillin in a population of hospitalized, critically ill patients.}\label{tab:hyp}
+\caption{Prior hyperparameters for piperacillin pharmacokinetics and error distribution in a population of hospitalized, critically ill patients.}\label{tab:hyp}
 \end{table}
 \end{center}
-
 
 
 \end{document}
