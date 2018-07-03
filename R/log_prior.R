@@ -6,7 +6,6 @@
 #' Parameter distributions:
 #' log(lv_1, lk_10, lk_12, lk_21) ~ N(mu, sig)
 #' log(error) ~ N(ler_mean, ler_sdev)
-#' Default values are based on a prior study
 #'
 #' @import mvtnorm
 #'

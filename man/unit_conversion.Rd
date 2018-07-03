@@ -4,18 +4,21 @@
 \alias{unit_conversion}
 \title{Unit conversion}
 \usage{
-unit_conversion(x, mvunits, forward = TRUE)
+unit_conversion(x, mvunits, to_gL = TRUE)
 }
 \arguments{
-\item{x}{The value of the number to be converted, or to convert 2 (depending on `forward` argument)}
+\item{x}{The value of the number to be converted, or to convert to (depending on `to_gL` argument)}
 
 \item{mvunits}{Units of the mass and volume of the data. Must be entered as "mass/volume"}
 
-\item{forward}{Boolean. Tells whether or not the conversion is forward (into g/L) or backward (from g/L to original)}
+\item{to_gL}{Boolean. Tells whether or not the conversion is into g/L or bfrom g/L to original}
 }
 \value{
-posterior estimates
+Value equivalent to input with the appropriate units.
 }
 \description{
 Converts units for compatibility with package functions.
+}
+\examples{
+unit_conversion(64, "mcg/mL")
 }
