@@ -10,6 +10,8 @@
 #'
 #' @return A list characterizing the infusion schedule
 #'
+#' @export
+#'
 #' @examples
 #' # Using begin/end times
 #' b <- c(0, 8, 16, 24)

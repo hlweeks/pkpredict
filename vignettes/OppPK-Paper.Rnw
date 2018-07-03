@@ -280,7 +280,7 @@ Below we provide an example demonstrating the use of this methodology using the 
 % \end{itemize}
 
 <<message = FALSE>>=
-# devtools::install_github("hlweeks/pkpredict")
+#devtools::install_github("hlweeks/pkpredict")
 library(pkpredict)
 @
 
