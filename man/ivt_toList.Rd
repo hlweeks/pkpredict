@@ -11,9 +11,9 @@ ivt_toList(begin, end = NULL, dur = NULL, rate)
 
 \item{end}{Times at which each infusion ended (relative to start of first infusion)}
 
-\item{dur}{Duration of each dose (h)}
+\item{dur}{Duration of each dose}
 
-\item{rate}{Rate of infusion for each dose (g/h)}
+\item{rate}{Rate of infusion for each dose}
 }
 \value{
 A list characterizing the infusion schedule
@@ -23,8 +23,16 @@ Helper function: Given vectors that characterize the infusion schedule, this hel
 to list format for compatibility with other package functions
 }
 \examples{
+# Using begin/end times
 b <- c(0, 8, 16, 24)
-e <- c(0.5, 8.5, 16.5, 24.5) # alternatively, specify durations: d <- rep(0.5, 4)
+e <- c(0.5, 8.5, 16.5, 24.5)
 r <- rep(6, 4)
 ivt_toList(begin = b, end = e, rate = r)
+
+Using begin time with infusion duration
+b <- c(0, 8, 16, 24)
+d <- 0.5 # Or d <- rep(0.5, 4)
+r <- 6
+ivt_toList(begin = b, dur = d, rate = r)
+
 }
