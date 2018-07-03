@@ -19,7 +19,7 @@
 #' r <- rep(6, 4)
 #' ivt_toList(begin = b, end = e, rate = r)
 #'
-#' Using begin time with infusion duration
+#' # Using begin time with infusion duration
 #' b <- c(0, 8, 16, 24)
 #' d <- 0.5 # Or d <- rep(0.5, 4)
 #' r <- 6
@@ -39,7 +39,7 @@ ivt_toList <- function(begin, end = NULL, dur = NULL, rate){
   if(!is.null(dur)){
     if(length(dur) == 1){
       dur <- rep(dur, length(begin))
-    }else if(length(dur != length(begin))){
+    }else if(length(dur) != length(begin)){
       stop('`dur` must have length = 1 or length = length(begin)')
     }
   }
@@ -47,7 +47,7 @@ ivt_toList <- function(begin, end = NULL, dur = NULL, rate){
 
   if(length(rate) == 1){
     rate <- rep(rate, length(begin))
-  }else if(length(rate != length(begin))){
+  }else if(length(rate) != length(begin)){
     stop('`rate` must have length = 1 or length = length(begin)')
   }
 

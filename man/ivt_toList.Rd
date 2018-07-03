@@ -29,7 +29,7 @@ e <- c(0.5, 8.5, 16.5, 24.5)
 r <- rep(6, 4)
 ivt_toList(begin = b, end = e, rate = r)
 
-Using begin time with infusion duration
+# Using begin time with infusion duration
 b <- c(0, 8, 16, 24)
 d <- 0.5 # Or d <- rep(0.5, 4)
 r <- 6
