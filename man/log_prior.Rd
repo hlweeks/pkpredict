@@ -4,9 +4,7 @@
 \alias{log_prior}
 \title{Log-prior for pharmacokinetic parameters}
 \usage{
-log_prior(lpr, mu = c(lv_1 = 3.223, lk_10 = -1.65, lk_12 = -7, lk_21 = -7),
-  sig = 300 * matrix(c(0.00167, -0.00128, 0, 0, -0.00128, 0.00154, 0, 0, 0, 0,
-  0.00015, 0, 0, 0, 0, 0.00015), 4, 4), ler_mean = 2.33, ler_sdev = 0.32)
+log_prior(lpr, mu, sig, ler_mean, ler_sdev)
 }
 \arguments{
 \item{lpr}{log-PK parameter vector with error: (lv_1, lk_10, lk_12, lk_21, ler_mean)}
@@ -30,7 +28,6 @@ normally distributed error.
 Parameter distributions:
 log(lv_1, lk_10, lk_12, lk_21) ~ N(mu, sig)
 log(error) ~ N(ler_mean, ler_sdev)
-Default values are based on a prior study
 }
 \examples{
 # Default parameter values based on prior study
@@ -43,5 +40,6 @@ ler_mean_d <- 2.33
 ler_sdev_d <- 0.32
 
 lpr_d  <- c(lpk_mean_d, ler_mean_d)
-log_prior(lpr_d, lpk_mean_d, lpk_vcov_d, ler_mean_d, ler_sdev_d)
+log_prior(lpr = lpr_d, mu = lpk_mean_d, sig = lpk_vcov_d,
+          ler_mean = ler_mean_d, ler_sdev = ler_sdev_d)
 }
