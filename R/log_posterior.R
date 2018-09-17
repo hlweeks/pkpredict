@@ -27,7 +27,7 @@ log_posterior <- function(lpr, ivt, dat,
   dat <- na.omit(dat)
 
   if(nrow(dat) < 1) {
-    log_prior(lpr)
+    log_prior(lpr, mu=mu, sig=sig, ler_mean=ler_mean, ler_sdev=ler_sdev)
   } else {
     log_like <- log_likelihood(lpr, ivt, dat)
     res <- log_prior(lpr, mu=mu, sig=sig, ler_mean=ler_mean, ler_sdev=ler_sdev) + log_like
