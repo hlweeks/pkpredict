@@ -1,0 +1,211 @@
+n.samples = 1000#
+# Prior distribution for PK parameters and error#
+lpk_mean_d <- c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)#
+lpk_vcov_d <- 300 * matrix(c(  0.00167, -0.00128,      0,      0,#
+                               -0.00128,  0.00154,      0,      0,#
+                               0,        0, .00015,      0,#
+                               0,        0,      0, .00015), 4, 4)#
+ler_mean_d <- 2.33#
+ler_sdev_d <- 0.32#
+#
+sample.params <- as.data.frame(exp(rmvnorm(n.samples, mean = lpk_mean_d, sigma = lpk_vcov_d)))#
+sample.params$err <- exp(rnorm(n.samples, ler_mean_d, ler_sdev_d))#
+names(sample.params) <- c("v_1", "k_10", "k_12", "k_21", "err")
+library(mvtnorm)
+n.samples = 1000#
+# Prior distribution for PK parameters and error#
+lpk_mean_d <- c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7)#
+lpk_vcov_d <- 300 * matrix(c(  0.00167, -0.00128,      0,      0,#
+                               -0.00128,  0.00154,      0,      0,#
+                               0,        0, .00015,      0,#
+                               0,        0,      0, .00015), 4, 4)#
+ler_mean_d <- 2.33#
+ler_sdev_d <- 0.32#
+#
+sample.params <- as.data.frame(exp(rmvnorm(n.samples, mean = lpk_mean_d, sigma = lpk_vcov_d)))#
+sample.params$err <- exp(rnorm(n.samples, ler_mean_d, ler_sdev_d))#
+names(sample.params) <- c("v_1", "k_10", "k_12", "k_21", "err")
+plot(sort(sample.params[,1]))
+tm_draws <- c(32, 32.5, 33, 33.5, 34, 35, 36, 38, 39.5)
+sample_params=smaple.params
+sample_params=sample.params
+c1_30m_mgL <- t(apply(sample_params, MARGIN = 1, function(row){#
+    sol = pk_solution(v_1 = row[1], k_10 = row[2], k_12 = row[3], k_21 = row[4], #
+                      ivt=ivt_3g30mq8)#
+    sol(tm_draws)[1,] # concentration in first compartment#
+  }))*1000
+library(pkpredict)
+c1_30m_mgL <- t(apply(sample_params, MARGIN = 1, function(row){#
+    sol = pk_solution(v_1 = row[1], k_10 = row[2], k_12 = row[3], k_21 = row[4], #
+                      ivt=ivt_3g30mq8)#
+    sol(tm_draws)[1,] # concentration in first compartment#
+  }))*1000
+ivt_3g30mq8 <- list(list(begin=0.0, end=0.5, k_R=6),#
+                    list(begin=8.0, end=8.5, k_R=6),#
+                    list(begin=16.0, end=16.5, k_R=6),#
+                    list(begin=24.0, end=24.5, k_R=6),#
+                    list(begin=32.0, end=32.5, k_R=6))
+c1_30m_mgL <- t(apply(sample_params, MARGIN = 1, function(row){#
+    sol = pk_solution(v_1 = row[1], k_10 = row[2], k_12 = row[3], k_21 = row[4], #
+                      ivt=ivt_3g30mq8)#
+    sol(tm_draws)[1,] # concentration in first compartment#
+  }))*1000
+sample_conc_30m <- matrix(rnorm(prod(dim(c1_30m_mgL)), #
+                           c1_30m_mgL, sample_params$err),#
+                     dim(c1_30m_mgL)[1], dim(c1_30m_mgL)[2], byrow = F)
+dat <- data.frame(time_h = tm_draws, conc_mgL = NA)
+metropolis <- function(theta, ivt, dat, Sigma){#
+  thetastar <- rmvnorm(1, theta, Sigma)#
+  post_tstar <- log_posterior(lpr = thetastar, ivt, dat = dat)#
+  post_theta <- log_posterior(lpr = theta, ivt, dat = dat)#
+  lratio = post_tstar - post_theta#
+  if(log(runif(1)) < lratio){#
+    theta <- thetastar#
+    attr(theta, "soln") <- attributes(post_tstar)$soln#
+  }else{#
+    attr(theta, "soln") <- attributes(post_theta)$soln#
+  }#
+  return(theta)#
+}#
+#
+metro_iterate <- function(nreps = 1000,#
+                          theta0,#
+                          return.AR = T,#
+                          n.reeva.sigma = nreps,#
+                          ivt, dat, Sigma){#
+  theta <- matrix(NA, nreps, length(theta0))#
+  soln_list <- vector(mode = "list", length = nreps)#
+  colnames(theta) <- c("lv_1", "lk_10", "lk_12", "lk_21", "lerr")#
+  theta[1,] <- theta0#
+  accept.count = 1#
+#
+  for(n in 2:nreps){#
+    metro <- metropolis(theta[n-1,], ivt, dat, Sigma)#
+    theta[n,] <- metro#
+    soln_list[[n]] <- attributes(metro)$soln#
+    if(sum(theta[n,] != theta[n-1,])>0) accept.count = accept.count + 1#
+    if(n == n.reeva.sigma){#
+      theta.bar = apply(theta[1:n,], 2, mean)#
+      theta.dif = sweep(theta[1:n,], 2, theta.bar)#
+      Sigma = (2.4^2/3)*Reduce("+", lapply(1:n, function(i){#
+        theta.dif[i,] %*% t(theta.dif[i,])})) / n#
+#
+    }#
+  }#
+  accept.rate = accept.count / nreps#
+  if(return.AR) return(list(theta = theta, acceptance.rate = accept.rate))#
+  theta_mat <- data.frame(theta = theta)#
+  attr(theta_mat, "soln_list") <- soln_list#
+  if(!return.AR) return(theta_mat)#
+}
+i=25
+lpr <- log(sample_params[i,])#
+  dat$conc_mgL <- sample_conc_30m[i,]#
+#
+  # get posterior estimate#
+  est <- optim(c(prior_log_mu, err_log_mean), # which parameters to optimize - starting values#
+               log_posterior, # function to minimize -- this includes the lpr values as an argument#
+               ivt=ivt_3g30mq8, # dosage schedule - argument to log_posterior, loaded from "model.R"#
+               dat=dat,#
+               control = list(fnscale=-1),#
+               hessian=TRUE)#
+#
+  # # estimate theta using metropolis algorithm#
+  Sigma0 = solve(-est$hessian)#
+  res = metro_iterate(nreps = nreps, theta0 = c(prior_log_mu, err_log_mean), #
+                      ivt = ivt_d, dat = dat, Sigma=Sigma0)#
+  theta = res[[1]][nburnin:nreps,]#
+#
+  # calculate laplace MIC bounds#
+  # Estimate time spent above threshold#
+  tms <- sapply(ivt_3g30mq8, function(x) c(x$begin, x$end))#
+  tms <- c(tms, max(tms)+8)#
+  tms <- unlist(sapply(1:(length(tms)-1), function(i) {#
+    s1 <- seq(tms[i], tms[i+1], 1/10)#
+    if(tms[i+1] %% 1/10)#
+      s1 <- c(s1, tms[i+1])#
+    return(s1)#
+  }))#
+  tms <- pmax(1e-3, tms)#
+#
+  # estimate percent of time above threshold / se for posterior est#
+  sol_post <- pk_solution(v_1=exp(est$par[1]), k_10=exp(est$par[2]),#
+                         k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=ivt_3g30mq8)#
+  con_post <- apply(sol_post(tms)*1000, 2, function(x) pmax(0,x))
+prior_log_mu= lpk_mean_d
+lpr <- log(sample_params[i,])#
+  dat$conc_mgL <- sample_conc_30m[i,]#
+#
+  # get posterior estimate#
+  est <- optim(c(prior_log_mu, err_log_mean), # which parameters to optimize - starting values#
+               log_posterior, # function to minimize -- this includes the lpr values as an argument#
+               ivt=ivt_3g30mq8, # dosage schedule - argument to log_posterior, loaded from "model.R"#
+               dat=dat,#
+               control = list(fnscale=-1),#
+               hessian=TRUE)#
+#
+  # # estimate theta using metropolis algorithm#
+  Sigma0 = solve(-est$hessian)#
+  res = metro_iterate(nreps = nreps, theta0 = c(prior_log_mu, err_log_mean), #
+                      ivt = ivt_d, dat = dat, Sigma=Sigma0)#
+  theta = res[[1]][nburnin:nreps,]#
+#
+  # calculate laplace MIC bounds#
+  # Estimate time spent above threshold#
+  tms <- sapply(ivt_3g30mq8, function(x) c(x$begin, x$end))#
+  tms <- c(tms, max(tms)+8)#
+  tms <- unlist(sapply(1:(length(tms)-1), function(i) {#
+    s1 <- seq(tms[i], tms[i+1], 1/10)#
+    if(tms[i+1] %% 1/10)#
+      s1 <- c(s1, tms[i+1])#
+    return(s1)#
+  }))#
+  tms <- pmax(1e-3, tms)#
+#
+  # estimate percent of time above threshold / se for posterior est#
+  sol_post <- pk_solution(v_1=exp(est$par[1]), k_10=exp(est$par[2]),#
+                         k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=ivt_3g30mq8)#
+  con_post <- apply(sol_post(tms)*1000, 2, function(x) pmax(0,x))
+err_log_mean <- ler_mean_d
+lpr <- log(sample_params[i,])#
+  dat$conc_mgL <- sample_conc_30m[i,]#
+#
+  # get posterior estimate#
+  est <- optim(c(prior_log_mu, err_log_mean), # which parameters to optimize - starting values#
+               log_posterior, # function to minimize -- this includes the lpr values as an argument#
+               ivt=ivt_3g30mq8, # dosage schedule - argument to log_posterior, loaded from "model.R"#
+               dat=dat,#
+               control = list(fnscale=-1),#
+               hessian=TRUE)#
+#
+  # # estimate theta using metropolis algorithm#
+  Sigma0 = solve(-est$hessian)#
+  res = metro_iterate(nreps = nreps, theta0 = c(prior_log_mu, err_log_mean), #
+                      ivt = ivt_d, dat = dat, Sigma=Sigma0)#
+  theta = res[[1]][nburnin:nreps,]#
+#
+  # calculate laplace MIC bounds#
+  # Estimate time spent above threshold#
+  tms <- sapply(ivt_3g30mq8, function(x) c(x$begin, x$end))#
+  tms <- c(tms, max(tms)+8)#
+  tms <- unlist(sapply(1:(length(tms)-1), function(i) {#
+    s1 <- seq(tms[i], tms[i+1], 1/10)#
+    if(tms[i+1] %% 1/10)#
+      s1 <- c(s1, tms[i+1])#
+    return(s1)#
+  }))#
+  tms <- pmax(1e-3, tms)#
+#
+  # estimate percent of time above threshold / se for posterior est#
+  sol_post <- pk_solution(v_1=exp(est$par[1]), k_10=exp(est$par[2]),#
+                         k_12=exp(est$par[3]), k_21=exp(est$par[4]), ivt=ivt_3g30mq8)#
+  con_post <- apply(sol_post(tms)*1000, 2, function(x) pmax(0,x))
+plot(tms, con_post[1,])
+plot(tms, con_post[1,], type='l')
+load("/Users/hannahweeks/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/847FC923-50F4-4D96-9F2E-4EF03D518E5A/20180615-log-par-est.RData")
+ls()
+rm(list=ls())
+ls()
+load("/Users/hannahweeks/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/847FC923-50F4-4D96-9F2E-4EF03D518E5A/20180615-log-par-est.RData")
+ls()
+str(lpars)

@@ -9,7 +9,7 @@
 %\VignetteIndexEntry{\texttt{pkpredict}: An R Package to Calculate Individualized Estimates of Pharmacokinetic Performance}
 
 \title{\texttt{pkpredict}: An R Package to Calculate Individualized Estimates of Pharmacokinetic Performance}
-\author{Hannah L. Weeks, Ryan T. Jarrett, Matthew S. Shotwell} % William H. Fissell?
+\author{Hannah L. Weeks, Matthew S. Shotwell} % William H. Fissell?
 \date{}
 
 \begin{document}
@@ -57,8 +57,6 @@ For an individual patient, pharmacokinetic uncertianty can be reduced through th
 
 
 
-
-
 We implement Bayesian methods using pharmacokinetic data from a prior study to provide posterior estimates of individual target attainment. Due to significant pharmacokinetic heterogeneity, measures of statistical uncertainty about target attainment are critical for understanding response to treatment at the patient level, and for clinical decision-making. We summarize this statistical uncertainty by computing and presenting 95\% credible intervals for patient-specific estimates of target attainment However, in order for these methods to be practical, it is necessary that computation can occur in real time. Due to the computational intensity of exact methods (e.g., Markov chain Monte Carlo), we sought to identify statistical approximations that are both accurate with regard to quantification of statistical uncertainty (i.e., the effective level of the approximate credible interval closely matches the nominal level, 95\%) while also being computationally feasible to implement with no significant delay (e.g., via a web application). We accomplish this by using a series of statistical approximations paired with a web application that renders these techniques accessible to, for example, a practicing physician. We present assessments of the accuracy and computational efficiency for this approach.
 
 
@@ -66,7 +64,7 @@ We implement Bayesian methods using pharmacokinetic data from a prior study to p
 
 \section{Methods}
 \subsection{Two-compartment model}
-The two-compartment model is the most commonly used to model pharmacokinetic processes for intraevenously infused drugs. It is expressed as a system of two ordinary differential equations as follows, where $m_1$ and $m_2$ are the masses of drug in the central and peripheral compartments, respectively.
+The two-compartment model is commonly used to model pharmacokinetic processes for intraevenously infused drugs. It is expressed as a system of two ordinary differential equations as follows, where $m_1$ and $m_2$ are the masses of drug in the central and peripheral compartments, respectively.
 
 \begin{align}
 \frac{dm_1}{dt} &= -k_{10}m_1 - k_{12}m_1 + k_{21}m_2 + k_R \nonumber \\
@@ -101,11 +99,11 @@ c_{ij} = \eta_i(t_{ij}, \theta_i) + \epsilon_{ij}
 \end{displaymath}
 \noindent In this expression, $c_{ij}$ is the measured concentration for subject $i = 1 \ldots n$ at time $t_{ij}$ for $j = 1 \ldots m_i$, $\eta_i(t_{ij}, \theta_i)$ is the two-compartment model solution for subject $i$ at time $t_{ij}$ given parameters $\theta_i = [v_{1i}, k_{10i}, k_{12i}, k_{21i}]$, and $\epsilon_{ij}$ represents i.i.d. random Normally-distributed error with mean zero and standard deviation $\sigma$. The subject-specific likelihood function is
 
-\begin{displaymath}
-L_i(\theta_i, \sigma) = \prod_{j=1}^{m_i} N(c_{ij} - \eta_i(t_{ij}, \theta_i), \sigma).
-\end{displaymath}
+\begin{align}
+L_i(\theta_i, \sigma|c_{ij}) = \prod_{j=1}^{m_i} \phi\bigg(\cfrac{c_{ij} - \eta_i(t_{ij}, \theta_i)}{\sigma}\bigg),
+\end{align}
 
-\noindent Thus, given a prior distribution $\pi_0(\theta_i, \sigma)$, the subject-specific posterior is proportional to the product of the prior and subject-specific likelihood: $\pi_i(\theta_i, \sigma) \propto \pi_0(\theta_i,\sigma)L_i(\theta_i,\sigma)$.
+\noindent where $\phi$ is the density of the standard normal distribution. Thus, given a prior distribution $\pi_0(\theta_i, \sigma)$, the subject-specific posterior is proportional to the product of the prior and subject-specific likelihood: $\pi_i(\theta_i, \sigma) \propto \pi_0(\theta_i,\sigma)L_i(\theta_i,\sigma)$.
 
 In the current context, the prior distribution is generated to satisfy the following:
 \begin{align}
@@ -150,14 +148,15 @@ In the results shown below and following section, we evaluate our approximation 
 We measure \mic by calculating a simple proportion of the time during the observation period above the desired threshold. By default, the method considers the conclusion of the full observation period to be the time at which the patient would have received their next infusion. This is determined by the dosing regimen administered by the physician. For example, if a patient is receiving 3 grams of a 30 minute infusion every 8 hours, the full observation period would conclude 8 hours after the final infusion begins. We use a bisection root-finding method to identify the times at which the patient's concentration-time curve crosses the threshold. Drug concentration in the central compartment increases if and only if the drug is actively being infused intravenously. Once the IV is removed, the drug concentration can only decrease. Thus, the adjacent time points at which one infusion ends and the next begins (and vice versa) are used as endpoints in the bisection process.Time 0 is taken to be the time of first drug infusion. This method assumes that the concentration of drug in the patient's body is 0$\mu$g/mL at time 0.
 
 
+\subsection{Evaluation of model and approximation method}
 
-\subsection{Evaluation of approximation method}
-
-We used simulation to evaluate the precision of the Laplace approximation. We obtained 1,000 samples (``patients'') from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the 4 PK prior parameters and the standard error term corresponding to the 5th prior parameter. Patients were assumed to receive five 30 minute infusions administered every 8 hours. All observations were simulated during the final dosing period at 0, 0.5, 1, 2, 4, and 6 hours after the start of the fifth infusion to evaluate coverage when a patient's response to the drug has achieved a more steady state.
+We used simulation to evaluate both the bias inherent in the model and the precision of the Laplace approximation. We obtained 1,000 samples (``patients'') from the prior distribution of PK parameters. For each set of prior parameters, 6 observations were simulated using the concentration predicted by the 4 PK prior parameters and the standard error term corresponding to the 5th prior parameter. Patients were assumed to receive five 30 minute infusions administered every 8 hours. All observations were simulated during the final dosing period at 0, 0.5, 1, 2, 4, and 6 hours after the start of the fifth infusion to assess the model when a patient's response to the drug has achieved a more steady state.
 
 % For each patient, we simulated 95\% credible intervals for each of the three interval types (logit, probit, and linear) using the Metropolis MCMC algorithm. This served as the gold standard used for comparison with the approximate intervals generated using the Laplace approximation. The exact intervals derived from the MCMC-generated sample data contain the correct posterior probability, 95\%. We sought to determine the posterior probability of the approximate 95\% credible intervals generated by our approximation method (section 2.2.1).
 
-For each of the 1,000 sets of prior parameters and simulated data, a Laplace approximation to the posterior density was calculated (Section 1.2.1 Equation 3) and the delta method used to estimate the standard errors of the MIC statistic. A 95\% approximate normal credible interval was used with the delta method standard errors to estimate upper and lower bounds. (Section 1.2.1 Equation 5). Next, 5,000 samples from each subject-specific posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm, with the first 2,000 warm-up iterations being discarded before proceeding. The proportion of the 3,000 posterior samples falling within the upper and lower bounds of the interval was used to estimate the proportion of the density of the MIC statistic within the approximate credible interval. We refer this is as the ``posterior coverage.'' This process was repeated for each of the three interval types (logit, probit, and linear).
+The model bias was computed as the difference between the model estimate of \mic and the true \mic. The true \mic was calculated using the patient-specific PK parameters sampled from the prior. For each of the 1,000 sets of prior parameters and simulated data, a Laplace approximation to the posterior density was calculated (Section 1.2.1 Equation 3) and the delta method used to estimate the standard errors of the MIC statistic. A 95\% approximate normal credible interval was used with the delta method standard errors to estimate upper and lower bounds. (Section 1.2.1 Equation 5). Next, 5,000 samples from each subject-specific posterior distribution of PK parameters were taken using a Metropolis MCMC algorithm, with the first 2,000 warm-up iterations being discarded before proceeding. The proportion of the 3,000 posterior samples falling within the upper and lower bounds of the interval was used to estimate the proportion of the density of the MIC statistic within the approximate credible interval. We refer this is as the ``posterior Bayesian coverage.'' This process was repeated for each of the three interval types (logit, probit, and linear).
+
+
 
 \section{Results \& Discussion}
 
@@ -167,9 +166,9 @@ load("/Users/hannahweeks/Desktop/all_cov.rdta")
 # Median (IQR) for each
 miqr <- purrr::partial(quantile, probs = c(.1, .25, .5, .75, .9), na.rm = T)
 
-miqr_logit <- miqr(coverage_res$coverage_logit)
-miqr_probit <- miqr(coverage_res$coverage_probit)
-miqr_frac <- miqr(coverage_res$coverage_frac)
+miqr_logit <- miqr(Bayesian coverage_res$Bayesian coverage_logit)
+miqr_probit <- miqr(Bayesian coverage_res$Bayesian coverage_probit)
+miqr_frac <- miqr(Bayesian coverage_res$Bayesian coverage_frac)
 
 spf <- purrr::partial(sprintf, fmt = "%.1f")
 
@@ -178,8 +177,10 @@ spf(miqr_logit*100)
 spf(miqr_probit*100)
 @
 
+When examining the bias in model estimates of \mic relative to the truth, observed bias can be much larger for the 30 minute infusion schedule relative to the 4 hour infusion schedule (Figure 1). The median (25$^{th}$-75$^{th}$ percentile) of absolute bias was 0.047 (0.012 - 0.143) for the 30 minute infusion schedule and 0.018 (0.0005 - 0.091) for the 4 hour infusion schedule. The 4 hour infusion schedule has a lower bias overall, although the model can still have bias exceeding $\pm 0.5$ in either direction.
 
-On 1,000 samples with a linear interval for \mic, we calculated a median posterior coverage of 89.7\% with an IQR from 87.4\% to 91.8\% (\ref{tab:res}). Thus, the approximate intervals are anticonservative relative to the nominal 95\% expected coverage. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior coverage, the linear scale was used. For the logit-transformed interval, the Bayesian coverage had a median (IQR bounds) of 89.1\% (86.5\%, 91.2\%) and the probit-transformed interval had 89.1\% (86.7\%, 91.3\%).
+
+On 1,000 samples with a linear interval for \mic, we calculated a median posterior Bayesian coverage of 89.7\% with an IQR from 87.4\% to 91.8\% (\ref{tab:res}). Thus, the approximate intervals are anticonservative relative to the nominal 95\% expected Bayesian coverage. Confidence intervals for the MIC statstic were also considered on the logit and probit scales in order to restrict the bounds to the interval [0,1]; however, as these transformations resulted in slightly lower and more variable posterior Bayesian coverage, the linear scale was used. For the logit-transformed interval, the Bayesian Bayesian coverage had a median (IQR bounds) of 89.1\% (86.5\%, 91.2\%) and the probit-transformed interval had 89.1\% (86.7\%, 91.3\%).
 
 All three approximate intervals were slightly anticonservative, and tended to include almost 90\% of the posterior density. While these approximation methods yield interval estimates that are silghlty anti-conservative, they are relatively close to nominal and can be useful for quick calculation of approximate patient performance. We suggest using the approximate intervals to obtain rough estimates for various dosing cycles, i.e. in more of an exploratory manner. In the case of clinical decision making, we recommend that an exact posterior interval obtained via MCMC sampling rather than directly using these approximate intervals. The following example demonstrates how the \texttt{pkpredict} package facilitates clinical decision making in the recommended manner.
 
@@ -187,6 +188,14 @@ As previously discussed in section 2.2.2, these results and the example in the f
 
 % A  target is (\mic) $\geq 0.5$, or at least half of the observation period is spent above the desired threshold. -- maybe discuss this as a way to use the app, like a specific endpoint for TDM
 
+\begin{figure}[h]
+\caption{Bias in model estimates of \mic}
+
+\includegraphics[scale=0.75]{biasmodelvstruth.pdf}
+
+\footnotesize
+Violin plots of the distribution of bias between true \mic values and model-based values. Infusion schedules are 30 minutes or 4 hours, each with 3 grams of piperacillin administered every 8 hours.
+\end{figure}
 
 
 
@@ -226,7 +235,7 @@ ggsave("intervalcomparison", plot = p, device = "pdf")
 % \includegraphics{intervalcomparison.pdf}
 %
 % \footnotesize
-% Plotted values represent the ``non-coverage'' in each tail region outside the 95\% confidence interval. Overall the three types of intervals appear similar in their performance. The transformed intervals more often have higher rates of non-coverage in the lower tail than the upper. Since the intervals have similar performance, in the \texttt{pkpredict} package logit-transformed intervals are used for \mic interval computations to enforce the $[0,1]$ bounds.
+% Plotted values represent the ``non-Bayesian coverage'' in each tail region outside the 95\% confidence interval. Overall the three types of intervals appear similar in their performance. The transformed intervals more often have higher rates of non-Bayesian coverage in the lower tail than the upper. Since the intervals have similar performance, in the \texttt{pkpredict} package logit-transformed intervals are used for \mic interval computations to enforce the $[0,1]$ bounds.
 % \end{figure}
 
 
@@ -239,7 +248,7 @@ Linear (untransformed) & 89.7 & (87.4, 91.8) \\
 Logit-transformed & 89.1 & (85.6, 91.2) \\
 Probit-transformed & 89.1 & (86.7, 91.3) \\
 \end{tabular}
-\caption{Posterior coverage for approximate 95\% credible intervals}\label{tab:res}
+\caption{Posterior Bayesian coverage for approximate 95\% credible intervals}\label{tab:res}
 \end{table}
 \end{center}
 
@@ -252,6 +261,10 @@ Probit-transformed & 89.1 & (86.7, 91.3) \\
 % \item note: make sure to uncomment line below and set up the bibtex doc
 % %\item use ``plasmode'' simulation to assess quality of method across variety of individuals (PK heterogeneity in this pop); recent example of plasmode use in \cite{Franklin2014}; pioneered by \cite{Vaughan2009} % make sure this line runs - might be an issue w/ configuring bibtex document
 % \end{itemize}
+
+
+
+
 
 
 
@@ -353,7 +366,7 @@ The \texttt{pkm} function fits a two-compartment model to obtain estimates of th
 
 <<eval = F>>=
 # Fit the PK model
-pk.fit <- pkm(formula = con ~ time, data = dat_d,
+pk.fit <- pkm(formula = concentration ~ time, data = dat_d,
               ivt = ivt_d, thres = 64)
 pk.fit$ftmic
 @
