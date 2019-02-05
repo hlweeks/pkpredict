@@ -4,10 +4,12 @@
 \alias{print.pkm}
 \title{Title}
 \usage{
-\method{print}{pkm}(x, ...)
+\method{print}{pkm}(x, digits = max(3L, getOption("digits") - 3L), ...)
 }
 \arguments{
 \item{x}{pkm model x}
+
+\item{digits}{number of digits to round to}
 
 \item{...}{other parameters}
 }

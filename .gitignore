@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+*.bib
 OppPK-Paper-concordance.tex
 OppPK-Paper.log
 OppPK-Paper.synctex.gz
@@ -10,5 +11,5 @@ Bayes.R
 model.R
 unnamed*
 figure/unnamed*
-
+vignettes/figure/*
 

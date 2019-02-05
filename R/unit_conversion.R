@@ -4,7 +4,7 @@
 #'
 #' @param x The value of the number to be converted, or to convert to (depending on `to_gL` argument)
 #' @param mvunits Units of the mass and volume of the data. Must be entered as "mass/volume"
-#' @param to_gL Boolean. Tells whether or not the conversion is into g/L or bfrom g/L to original
+#' @param to_gL Boolean. Tells whether or not the conversion is into g/L or from g/L to original
 #'
 #' @return Value equivalent to input with the appropriate units.
 #'
