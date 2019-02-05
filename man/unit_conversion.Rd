@@ -11,7 +11,7 @@ unit_conversion(x, mvunits, to_gL = TRUE)
 
 \item{mvunits}{Units of the mass and volume of the data. Must be entered as "mass/volume"}
 
-\item{to_gL}{Boolean. Tells whether or not the conversion is into g/L or bfrom g/L to original}
+\item{to_gL}{Boolean. Tells whether or not the conversion is into g/L or from g/L to original}
 }
 \value{
 Value equivalent to input with the appropriate units.

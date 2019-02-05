@@ -5,7 +5,7 @@ Author: Matthew Shotwell [aut],
   Hannah Weeks [aut,cre]
 Maintainer: Hannah Weeks <hannah.weeks@vanderbilt.edu>
 Description: Contains functions to perform analyses associated with pharmacokinetic modeling in a Bayesian framework.
-Depends: R (>= 3.3.2), mvtnorm
+Depends: R (>= 3.5.0), mvtnorm
 Imports: stats, shiny, shinydashboard, rhandsontable
 URL: https://github.com/hlweeks/pkpredict
 License: GPL-3
