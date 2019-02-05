@@ -4,6 +4,7 @@
 \graphicspath{{./figure/}}
 %\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
 \newcommand{\mic}{$ft > k \times \text{MIC }$}
+\newcommand{\comment}[1]{\ignorespaces}
 
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{\texttt{pkpredict}: An R Package to Calculate Individualized Estimates of Pharmacokinetic Performance}
@@ -23,21 +24,6 @@ library(rhandsontable)
 @
 
 
-% Outline:
-% 1. Introduction
-% 2. Methods
-%  - PK model (two-compartment)
-%  - PD summaries (T>MIC)
-%  - Statistical model (Bayesian NLR); prior and where it comes from
-%  - Approximate intervals for MIC statistic
-%  - Evaluating quality of approximate intervals
-%  3. Results; summary of CI quality
-%  4. Examples
-%  5. Discussion/conclusion; potential extensions
-%  - statistical [covariates, different types of models]
-%  - applications)
-% Extensions
-% Conclusions
 
 \section{Introduction}
 %\begin{itemize}
@@ -49,7 +35,7 @@ library(rhandsontable)
 %\end{itemize}
 
 %[need references]
-Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as piperacillin and ciprofloxacin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g., body mass) or complications (e.g., organ failure). As a result, simple algorithmic dosing strategies (e.g., based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
+Adverse medical consequences can arise from both antibiotic underdosing and overdosing of hospitalized patients. In the former case, patients receive an insufficient amount of antibiotic to effectively combat infection. In the latter, an overabundance of antibiotic may increase the risk of toxicity. However, the pharmacokinetics and pharmacodynamics of common antibiotics, such as piperacillin and ciprofloxacin, can exhibit substantial variability among hospitalized patients due to patient characteristics (e.g. body mass) or complications (e.g. organ failure). As a result, simple algorithmic dosing strategies (e.g. based on creatinine alone) can fail to ensure an appropriate level of antibiotic exposure.\\
 %**\cite{Shotwell2015, Shotwell2016} - need to sort out bibtex
 
 For an individual patient, pharmacokinetic uncertianty can be reduced through therapeutic drug monitoring (TDM). TDM involves measuring drug concentration in the blood over time and using these values to assess whether a patient is receiving the appropriate amount of the drug. This information can be used to estimate current and past drug exposure, predict future drug exposure under alternative dosing strategies, and adjust the dose accordingly. The methods and software presented herein were designed to implement this process using prior information about pharmacokinetic heterogeneity in the target population and, if available for the individual, measurements of drug concentration in the blood over time. In order to impact clinical decision making, these tasks must be accomplished in real-time and account for (often substantial) statistical uncertainty.\\
@@ -64,14 +50,15 @@ We implement Bayesian methods and compartmental analysis using pharmacokinetic d
 
 \section{Methods}
 \subsection{Two-compartment model}
-The two-compartment model is commonly used to model pharmacokinetic processes for intraevenously infused drugs. We focus on the intravenous infusion version of the two-compartment model because our application calls for it. It is expressed as a system of two ordinary differential equations as follows, where $m_1$ and $m_2$ are the masses of drug in the central and peripheral compartments, respectively.
+Compartment models are often used to model pharmacokinetic processes. We focus on the intravenous infusion version of the two-compartment model because our application calls for it. This model consists of a central and a peripheral compartment, and is characterized by pharmacokinetic parameters that describe processes of absorption, distribution, and elimination of the drug in the body. \comment{(Figure \ref{fig:twocomp})} The central compartment is typically considered to represent the blood, or plasma, from which concentration measurements are directly observed. The peripheral compartment represents tissue in the body. \comment{\cite{metzler1971}} This model is expressed as a system of two ordinary differential equations as follows:
 
 \begin{align}
 \frac{dm_1}{dt} &= -k_{10}m_1 - k_{12}m_1 + k_{21}m_2 + k_R \nonumber \\
 \frac{dm_2}{dt} &= \phantom{-k_{10}m_1} + k_{12}m_1 - k_{21}m_2 \nonumber
 \end{align}
 
-The concentration of drug in the central compartment is given by $c_1 = m_1/v_1$, where $v_1$ is the volume of the central compartment. The parameters $k_{10}$, $k_{12}$, $k_{21}$, and $k_R$ are described in Table \ref{tab:pkpars}. Drugs administered in an alternative fashion (e.g. orally or via bolus injection) may be modelled differently, and thus have pharmacokinetic parameters different from those presented here. Note that an IV bolus injection could be modeled as a short-term infusion.
+\noindent where  where $m_1(t)$ and $m_2(t)$ are the masses of drug in the central and peripheral compartments, respectively, at time $t$; parameters $k_{ij}$ represent distribution/elimination rates from compartment $i$ to compartment $j$, where 0 is excretion from the body; and $k_R$ is the rate at which the drug is infused. \comment{(Table \ref{tab:pkpars})} In our context, we assume a zero-order (constant) rate of infusion and first-order elimination rates. That is, the $k_{ij}$ are proportional to the amount of drug in the excreting compartment. The concentration of drug in the central compartment is given by $c_1 = m_1/v_1$, where $v_1$ is the volume of the central compartment. The parameters $k_{10}$, $k_{12}$, $k_{21}$, and $k_R$ are described in Table \ref{tab:pkpars}. Drugs administered in an alternative fashion (e.g. orally or via bolus injection) may be modeled differently, and thus have pharmacokinetic parameters different from those presented here. Note that an IV bolus injection could be modeled as a short-term infusion.
+
 
 \begin{table}[h]
 \begin{tabular}{lll} \hline
@@ -304,7 +291,7 @@ start_times <- c(0, 8, 16, 24, 32)
 # Duration of each infusion in hours
 duration <- 0.5
 # Rate in g/h
-rate_of_infusion <- rep(6, 5)
+rate_of_infusion <- 6
 
 ivt_d <- ivt_toList(begin = start_times, dur = duration, rate = rate_of_infusion)
 @
@@ -367,7 +354,7 @@ The \texttt{pkm} function fits a two-compartment model to obtain estimates of th
 
 <<eval = F>>=
 # Fit the PK model
-pk.fit <- pkm(formula = concentration ~ time, data = dat_d,
+pk.fit <- pkm(formula = con ~ time, data = dat_d,
               ivt = ivt_d, thres = 64)
 pk.fit$ftmic
 @

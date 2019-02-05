@@ -34,7 +34,7 @@
 #' # Insert example from Bayes.R
 #' # pkm(concentration ~ time, dat_d, ivt_d) # something like this
 
-pkm <- function(formula, data, subset, ivt,
+pkm <- function(formula, data, subset, ivt, unit = "g/L",
                 pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
                 alp=0.05, cod=12, thres=64,
                 timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
@@ -92,7 +92,8 @@ pkm <- function(formula, data, subset, ivt,
   ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
                     pars = pars, cod = cod, mcmc = mcmc, shiny = shiny)
 
-  obj <- list(#"call" = match.call(),
+  obj <- list("call" = match.call(),
+              "units" = unit,
               # Posterior estimate
               "optim" = est,
               # Prior information
