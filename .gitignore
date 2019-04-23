@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.bib
+*.RData
 OppPK-Paper-concordance.tex
 OppPK-Paper.log
 OppPK-Paper.synctex.gz
