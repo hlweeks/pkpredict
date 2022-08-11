@@ -23,7 +23,7 @@ print.pkm <- function (x, digits = max(3L, getOption("digits") - 3L), ...)
   cat("\nft > k x MIC estimate:\n",
       paste0(round(x$ftmic$ftmic, digits), " (",
              round(x$ftmic$conf.int[1], digits), ", ",
-             round(x$ftmic$conf.int[1], digits), ")"))
+             round(x$ftmic$conf.int[2], digits), ")"))
 
   cat("\n")
   invisible(x)
