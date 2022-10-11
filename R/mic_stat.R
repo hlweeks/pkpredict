@@ -144,7 +144,7 @@ mic_stat <- function(ivt, th, dat = data.frame(),
                        mic_samples[i] <- get_stat(theta_samples[i,])
                      }})
     }else{
-      mic_samples <- apply(theta_samples, MARGIN = 1, get_stat, inherit.soln = TRUE)
+      mic_samples <- apply(theta_samples, MARGIN = 1, get_stat)
     }
 
     ci_mic <- quantile(mic_samples, probs = c(alp/2, 1 - (alp/2)))
