@@ -5,6 +5,7 @@
 .Ruserdata
 *.bib
 *.RData
+*.rds
 OppPK-Paper-concordance.tex
 OppPK-Paper.log
 OppPK-Paper.synctex.gz
