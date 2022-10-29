@@ -24,6 +24,10 @@ pk_solution <- function(k_10, k_12, k_21, v_1, ivt, init=c(0,0)) {
     prd <- sort(unique(c(0, c(ibe,ied), Inf)))
     rits <- list()
 
+    # ensure all arguments are vectors
+    k_10 <- as.numeric(k_10); k_12 <- as.numeric(k_12)
+    k_21 <- as.numeric(k_21); v_1 <- as.numeric(v_1)
+
     ## compute basic solution in each interval
     for(i in 1:(length(prd)-1)) {
       civt <- sapply(ivt, function(iv) {

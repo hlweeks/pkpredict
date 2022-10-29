@@ -10,18 +10,27 @@
 #'
 #' @export
 #'
-fdGrad <- function (pars, fun, ...,
-                    .relStep = (.Machine$double.eps)^(1/2),
-                    minAbsPar = 0) {
-
+fdGrad <- function (pars, fun, ..., .relStep = (.Machine$double.eps)^(1/2), minAbsPar = 0){
   npar <- length(pars)
-  incr <- ifelse(abs(pars) <= minAbsPar, .relStep,
-                 (abs(pars)-minAbsPar) * .relStep)
-  ival <- do.call(fun, list(pars, ...))
-  diff <- rep(0,npar)
+  incr <- ifelse(abs(pars) <= minAbsPar, .relStep, (abs(pars) -
+                                                      minAbsPar) * .relStep)
   sapply(1:npar, function(i) {
-    del <- rep(0,npar)
+    del <- rep(0, npar)
     del[i] <- incr[i]
-    (do.call(fun, list(pars+del, ...))-ival)/incr[i]
+
+
+    # Save two sides of difference below - if both inf (same sign), return 0
+    diff1 <- do.call(fun, list(pars + del, ...))
+    diff2 <- do.call(fun, list(pars - del, ...))
+
+    if(is.infinite(diff1) & is.infinite(diff2)){
+      if(sign(diff1) == sign(diff2)){
+        0
+      }else{
+        Inf
+      }
+    }else{
+      (diff1 - diff2)/incr[i]/2
+    }
   })
 }

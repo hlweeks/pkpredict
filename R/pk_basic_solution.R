@@ -33,6 +33,9 @@ pk_basic_solution <-
     N_21 <- (k_21+lambda[2])/k_21
     N_22 <- (k_21+lambda[1])/k_21
     N <- matrix(c(-1,N_21,-1,N_22),2,2)
+    # N_21 <-k_12/(k_21+lambda[2])
+    # N_22 <-k_12/(k_21+lambda[1])
+    # N <- matrix(c(1,N_21,1,N_22),2,2)
     gamma <- c(k_R/k_10/v_1, k_12*k_R/k_10/k_21/v_1)
     r <- c(( N_22*(c_0[1]-(k_R/v_1/k_10)) +
                (c_0[2]-(k_R/v_1/k_10)*k_12/k_21)),

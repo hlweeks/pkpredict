@@ -4,8 +4,7 @@
 \alias{fdGrad}
 \title{Finite-difference gradient}
 \usage{
-fdGrad(pars, fun, ..., .relStep = (.Machine$double.eps)^(1/2),
-  minAbsPar = 0)
+fdGrad(pars, fun, ..., .relStep = (.Machine$double.eps)^(1/2), minAbsPar = 0)
 }
 \arguments{
 \item{pars}{Parameters involved in gradient computation}

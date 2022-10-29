@@ -16,13 +16,13 @@
 #' @param cod Length of time after end of last dose to consider
 #' @param thres Threshold for effective treatment (mcg/ml)
 #' @param mcmc logical: should estimate of time above threshold be computed using MCMC (false = laplace approximation)
-#'
 #' @param timeint time interval over which to compute estimate
 #' @param nreps number of MCMC iterations to perform (including burn in)
 #' @param nburnin number of burn in replications to perform
 #' @param seed seed for replicating MCMC results
 #' @param shiny is this being used within shiny_pkm
-#' @param ... other parameters
+#' @param ... additional arguments (e.g., `mu`, `sig`, `ler_mean`, `ler_sdev` for changing the PK parameter prior mean,
+#' variance-covariance matrix and error prior mean and standard deviation, respectively)
 #'
 #' @details Measurements must be entered in particular units: mcg/ml for concentrations, g/h in rate of
 #' infusion, hours for times.
@@ -31,14 +31,19 @@
 #' @export
 #'
 #' @examples
-#' # Insert example from Bayes.R
-#' # pkm(concentration ~ time, dat_d, ivt_d) # something like this
+#' ivt_d <- list(list(begin=0.0, end=0.5, k_R=6),
+#'               list(begin=8.0, end=8.5, k_R=6),
+#'               list(begin=16.0, end=16.5, k_R=6))
+#' dat_d <- data.frame(time_h = c(1,4,40), conc_mcg_ml = c(82.7,80.4,60))
+#'
+#' pkm(conc_mcg_ml ~ time_h, data = dat_d, ivt = ivt_d)
 
-pkm <- function(formula, data, subset, ivt, unit = "g/L",
-                pars = c(lv_1=3.223, lk_10=-1.650, lk_12 = -7, lk_21 = -7, lerr = 2.33),
+pkm <- function(formula, data, subset, ivt,
+                pars = c(getOption("pkpredict.pip.default.prior")$log_pk_mean,
+                         getOption("pkpredict.pip.default.prior")$log_err_mean),
                 alp=0.05, cod=12, thres=64,
                 timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-                mcmc = FALSE, nreps = 6000, nburnin = 3000, seed = NULL, shiny = FALSE, ...) {
+                mcmc = FALSE, nreps = 5000, nburnin = 2000, seed = NULL, shiny = FALSE, ...) {
 
   # Allows formula, data, and subset to be optional (for prior only)
   mc <- match.call(expand.dots = FALSE)
@@ -62,7 +67,7 @@ pkm <- function(formula, data, subset, ivt, unit = "g/L",
 
   # Only depends on pars if nrow(dat) == 0
   est <- optim(pars, log_posterior, ivt = ivt, dat = dat,
-               control = list(fnscale=-1), hessian=TRUE)
+               control = list(fnscale=-1), hessian=TRUE, ...)
 
   # Times at which to compute concentration estimates and SE: dose and concentration meas times
   tms <- c(sapply(ivt, function(x) x$begin),
@@ -90,10 +95,10 @@ pkm <- function(formula, data, subset, ivt, unit = "g/L",
 
   # MIC statistic information
   ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
-                    pars = pars, cod = cod, mcmc = mcmc, shiny = shiny)
+                    pars = pars, cod = cod, mcmc = mcmc, shiny = shiny, ...)
 
   obj <- list("call" = match.call(),
-              "units" = unit,
+              #"units" = unit,
               # Posterior estimate
               "optim" = est,
               # Prior information
