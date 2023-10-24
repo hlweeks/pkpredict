@@ -2,9 +2,9 @@
 % Please edit documentation in R/metro.R
 \name{metropolis}
 \alias{metropolis}
-\title{Functions needed for MH and MCMC, currently NOT exported.}
+\title{Functions needed for MH and MCMC, currently not exported.}
 \usage{
-metropolis(theta, ivt, dat, Sigma)
+metropolis(theta, ivt, dat, Sigma, ...)
 }
 \arguments{
 \item{theta}{pk parameters}
@@ -14,7 +14,10 @@ metropolis(theta, ivt, dat, Sigma)
 \item{dat}{data}
 
 \item{Sigma}{covariance matrix}
+
+\item{...}{additional arguments (e.g., `mu`, `sig`, `ler_mean`, `ler_sdev` for changing the PK parameter prior mean,
+variance-covariance matrix and error prior mean and standard deviation, respectively)}
 }
 \description{
-Functions needed for MH and MCMC, currently NOT exported.
+Functions needed for MH and MCMC, currently not exported.
 }

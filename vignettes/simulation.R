@@ -3,7 +3,6 @@
 
 library(pkpredict)
 library(parallel)
-#library(ecoreg)
 
 ### Generate sample data
 # sample observations from the prior distribution

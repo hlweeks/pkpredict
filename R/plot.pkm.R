@@ -38,12 +38,16 @@ plot.pkm <- function(x, alp = 0.05, ...){
   con <- con[1,]
 
   ## Approximate standard deviation of log concentration-time curve
-  grd <- fdGrad(est$par, function(pars) {
-    sol <- pk_solution(v_1=exp(pars[1]), k_10=exp(pars[2]),
-                       k_12=exp(pars[3]), k_21=exp(pars[4]), ivt=ivt)
-    log(sol(tms)[1,]*1000) ## mulitply by 1000: g/l -> ug/ml
+  grd <- sapply(tms, function(tm) {
+    fdGrad(est$par, function(pars) {
+      sol <- pk_solution(v_1 = exp(pars[1]), k_10 = exp(pars[2]),
+                         k_12 = exp(pars[3]), k_21 = exp(pars[4]), ivt = ivt)
+      log(sol(tm)[1, ] * 1000)
+    })
   })
-  sde <- sqrt(diag(grd %*% solve(-est$hessian) %*% t(grd)))
+  sde <- apply(grd, MARGIN = 2, function(grd_i) {
+    sqrt(diag(t(grd_i) %*% solve(-est$hessian) %*% grd_i))
+  })
   sde <- ifelse(is.nan(sde), 0, sde)
 
 

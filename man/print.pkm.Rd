@@ -2,20 +2,20 @@
 % Please edit documentation in R/print.pkm.R
 \name{print.pkm}
 \alias{print.pkm}
-\title{Title}
+\title{Print method for pkm object}
 \usage{
 \method{print}{pkm}(x, digits = max(3L, getOption("digits") - 3L), ...)
 }
 \arguments{
-\item{x}{pkm model x}
+\item{x}{pkm model}
 
 \item{digits}{number of digits to round to}
 
 \item{...}{other parameters}
 }
 \value{
-printed model x
+Printed model
 }
 \description{
-Title
+Print method for pkm object
 }

@@ -4,8 +4,7 @@
 \alias{update.pkm}
 \title{Update method for PK model}
 \usage{
-\method{update}{pkm}(object, formula = NULL, newdat = NULL, newivt = NULL,
-  ...)
+\method{update}{pkm}(object, formula = NULL, newdat = NULL, newivt = NULL, ...)
 }
 \arguments{
 \item{object}{An object of class "pkm}
