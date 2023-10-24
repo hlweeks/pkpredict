@@ -18,6 +18,7 @@ pkm(
   mcmc = FALSE,
   nreps = 5000,
   nburnin = 2000,
+  nthin = 10,
   seed = NULL,
   shiny = FALSE,
   ...
@@ -49,6 +50,8 @@ and rate of infusion at each dose}
 \item{nreps}{number of MCMC iterations to perform (including burn in)}
 
 \item{nburnin}{number of burn in replications to perform}
+
+\item{nthin}{mcmc thinning interval}
 
 \item{seed}{seed for replicating MCMC results}
 

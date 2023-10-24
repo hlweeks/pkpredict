@@ -32,6 +32,10 @@ log_prior <- function(lpr,
                       ler_mean = getOption("pkpredict.pip.default.prior")$log_err_mean,
                       ler_sdev = getOption("pkpredict.pip.default.prior")$log_err_sd){
 
+  if(is.null(mu) | is.null(sig) | is.null(ler_mean) | is.null(ler_sdev)){
+    stop("One or more of `mu`, `sig`, `ler_mean`, or `ler_sdev` arguments is NULL. Set prior arguments manually or use `options(pkpredict.pip.default.prior = data(default_pip_prior))`")
+  }
+
   val <- mvtnorm::dmvnorm(lpr[1:4], mu, sig, log = TRUE) +
            dnorm(lpr[5], mean=ler_mean, sd=ler_sdev, log=TRUE)
 

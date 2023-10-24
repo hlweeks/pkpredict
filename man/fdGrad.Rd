@@ -4,18 +4,18 @@
 \alias{fdGrad}
 \title{Finite-difference gradient}
 \usage{
-fdGrad(pars, fun, ..., .relStep = (.Machine$double.eps)^(1/2), minAbsPar = 0)
+fdGrad(pars, fun, .relStep = (.Machine$double.eps)^(1/2), minAbsPar = 0, ...)
 }
 \arguments{
 \item{pars}{Parameters involved in gradient computation}
 
 \item{fun}{Function for which the finite difference gradient is computed}
 
-\item{...}{Other arguments for \code{fun} not involved in gradient computation}
-
 \item{.relStep}{Amount to shift parameter values when calculating gradient}
 
 \item{minAbsPar}{Minimum absolute parameter value}
+
+\item{...}{Other arguments for \code{fun} not directly involved in gradient computation}
 }
 \value{
 Finite difference gradient

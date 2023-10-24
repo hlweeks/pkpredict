@@ -12,35 +12,40 @@
 
 
 metropolis <- function(theta, ivt, dat, Sigma, ...){
+  # Sample point from proposal distribution
   thetastar <- rmvnorm(1, theta, Sigma)
 
   post_tstar <- log_posterior(lpr = thetastar, ivt, dat = dat, ...)
   post_theta <- log_posterior(lpr = theta, ivt, dat = dat, ...)
 
+  # log-LR
   lratio = post_tstar - post_theta
 
+  # Accept point with some probability
   if(log(runif(1)) < lratio){
-    theta <- thetastar
-    attr(theta, "soln") <- attributes(post_tstar)$soln
+    theta_keep <- thetastar
+    # attr(theta, "soln") <- attributes(post_tstar)$soln
   }else{
-    attr(theta, "soln") <- attributes(post_theta)$soln
+    theta_keep <- theta
+    # attr(theta, "soln") <- attributes(post_theta)$soln
   }
 
-  return(theta)
+  return(theta_keep)
 }
 
 metro_iterate <- function(nreps = 1000,
                           theta0,
-                          return.AR = TRUE,
-                          n.reeva.sigma = nreps,
                           ivt, dat, Sigma,
                           shiny = FALSE)
 {
+  # Initialize objects
   theta <- matrix(NA, nreps, length(theta0))
-  soln_list <- vector(mode = "list", length = nreps)
   colnames(theta) <- c("lv_1", "lk_10", "lk_12", "lk_21", "lerr")
-  theta[1,] <- theta0
+  # soln_list <- vector(mode = "list", length = nreps)
   accept = rep(NA, nreps)
+
+  # Starting theta guess
+  theta[1,] <- theta0
 
   if(shiny){
     shiny::withProgress(message = 'Sampling from the posterior distribution', value = 0, min = 0, max = 1,
@@ -50,43 +55,27 @@ metro_iterate <- function(nreps = 1000,
                      }
 
                      theta[n,] <- metropolis(theta[n-1,], ivt, dat, Sigma)
-                     if(sum(theta[n,] != theta[n-1,])>0) accept.count = accept.count + 1
+                     accept[n] <- ifelse(all.equal(theta[n,], theta[n-1,]), 0, 1)
 
-                     # if(n == n.reeva.sigma){
-                     #   theta.bar = apply(theta[1:n,], 2, mean)
-                     #   theta.dif = sweep(theta[1:n,], 2, theta.bar)
-                     #   Sigma = (2.4^2/3)*Reduce("+", lapply(1:n, function(i){
-                     #     theta.dif[i,] %*% t(theta.dif[i,])})) / n
-                     # }
                    }
                  })
   }else{
-    for(n in 2:nreps){
-      metro <- metropolis(theta[n-1,], ivt, dat, Sigma)
-      theta[n,] <- metro
-      soln_list[[n]] <- attributes(metro)$soln
+    for(i in 2:nreps){
+      metro <- metropolis(theta[i-1,], ivt, dat, Sigma)
+      theta[i,] <- metro
+      # soln_list[[i]] <- attributes(metro)$soln
 
-      accept[n] <- ifelse(all.equal(theta[n,], theta[n-1,]), 0, 1)
+      accept[i] <- ifelse(all.equal(theta[i,], theta[i-1,]) == TRUE,
+                          0, 1)
 
-
-      # return acceptance rate in main function
-      # remove?
-      # if(n == n.reeva.sigma){
-      #   theta.bar = apply(theta[1:n,], 2, mean)
-      #   theta.dif = sweep(theta[1:n,], 2, theta.bar)
-      #   Sigma = (2.4^2/3)*Reduce("+", lapply(1:n, function(i){
-      #     theta.dif[i,] %*% t(theta.dif[i,])})) / n
-      # }
     }
   }
 
+  # Remove first element (NA)
+  accept <- accept[-1]
 
+  return(list(theta_df = data.frame(theta),
+              acceptance = accept))
 
-
-  if(return.AR) return(list(theta = theta, acceptance = accept))
-
-  theta_mat <- data.frame(theta = theta)
-  attr(theta_mat, "soln_list") <- soln_list
-  if(!return.AR) return(theta_mat)
 }
 

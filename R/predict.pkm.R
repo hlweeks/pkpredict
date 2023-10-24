@@ -21,7 +21,7 @@ predict.pkm <- function(object, times = NULL, ...){
     return(data.frame("Time" = object$fitted.values$time,
                       "Concentration" = object$fitted.values$conc))
   }else{
-    con <- apply(object$sol.eqn(times)*1000, 2, function(x) pmax(0,x))
+    con <- apply(object$sol.eqn(times)[1,]*1000, 2, function(x) pmax(0,x))
     return(data.frame("Time" = times,
                       "Concentration" = con))
   }

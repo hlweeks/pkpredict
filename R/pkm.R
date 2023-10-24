@@ -19,6 +19,7 @@
 #' @param timeint time interval over which to compute estimate
 #' @param nreps number of MCMC iterations to perform (including burn in)
 #' @param nburnin number of burn in replications to perform
+#' @param nthin mcmc thinning interval
 #' @param seed seed for replicating MCMC results
 #' @param shiny is this being used within shiny_pkm
 #' @param ... additional arguments (e.g., `mu`, `sig`, `ler_mean`, `ler_sdev` for changing the PK parameter prior mean,
@@ -43,7 +44,7 @@ pkm <- function(formula, data, subset, ivt,
                          getOption("pkpredict.pip.default.prior")$log_err_mean),
                 alp=0.05, cod=12, thres=64,
                 timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
-                mcmc = FALSE, nreps = 5000, nburnin = 2000, seed = NULL, shiny = FALSE, ...) {
+                mcmc = FALSE, nreps = 5000, nburnin = 2000, nthin = 10, seed = NULL, shiny = FALSE, ...) {
 
   # Allows formula, data, and subset to be optional (for prior only)
   mc <- match.call(expand.dots = FALSE)
@@ -75,17 +76,21 @@ pkm <- function(formula, data, subset, ivt,
   if(nrow(dat) > 0){tms <- c(tms, dat$time_h)}
   tms <- sort(unique(tms))
   # Prevent log(0)
-  tms <- pmax(1e-3, tms)
+  tms <- pmax(1e-5, tms)
 
 
 
-  ## Approximate standard deviation of log concentration-time curve
-  grd <- fdGrad(est$par, function(pars) {
-    sol <- pk_solution(v_1=exp(pars[1]), k_10=exp(pars[2]),
-                       k_12=exp(pars[3]), k_21=exp(pars[4]), ivt=ivt)
-    log(sol(tms)[1,]*1000) ## mulitply by 1000: g/l -> ug/ml
+  ## Approximate pointwise standard deviation of log concentration-time curve
+  grd <- sapply(tms, function(tm){
+    fdGrad(est$par, function(pars) {
+      sol <- pk_solution(v_1=exp(pars[1]), k_10=exp(pars[2]),
+                         k_12=exp(pars[3]), k_21=exp(pars[4]), ivt=ivt)
+      log(sol(tm)[1,]*1000) ## mulitply by 1000: g/l -> ug/ml
+    })
   })
-  sde <- sqrt(diag(grd %*% solve(-est$hessian) %*% t(grd)))
+  sde <- apply(grd, MARGIN = 2, function(grd_i){
+      sqrt(diag(t(grd_i) %*% solve(-est$hessian) %*% grd_i))
+    })
   sde <- ifelse(is.nan(sde), 0, sde)
 
   ## Posterior estiamte
@@ -95,14 +100,15 @@ pkm <- function(formula, data, subset, ivt,
 
   # MIC statistic information
   ftmic <- mic_stat(ivt = ivt, th = thres, dat = dat,
-                    pars = pars, cod = cod, mcmc = mcmc, shiny = shiny, ...)
+                    pars = pars, cod = cod, mcmc = mcmc,
+                    nreps = nreps, nburnin = nburnin, nthin = nthin,
+                    shiny = shiny, ...)
 
   obj <- list("call" = match.call(),
               #"units" = unit,
               # Posterior estimate
               "optim" = est,
               # Prior information
-              # NEED TO GET PRIOR ESTIMATES??
 
               # Relevant data
               "infsched" = ivt,

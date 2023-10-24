@@ -32,6 +32,7 @@ log_posterior <- function(lpr, ivt, dat,
                           sig = getOption("pkpredict.pip.default.prior")$log_pk_vcov,
                           ler_mean = getOption("pkpredict.pip.default.prior")$log_err_mean,
                           ler_sdev = getOption("pkpredict.pip.default.prior")$log_err_sd){
+
   if(is.null(mu) | is.null(sig) | is.null(ler_mean) | is.null(ler_sdev)){
     stop("One or more of `mu`, `sig`, `ler_mean`, or `ler_sdev` arguments is NULL. Set prior arguments manually or use `options(pkpredict.pip.default.prior = data(default_pip_prior))`")
   }
@@ -39,11 +40,13 @@ log_posterior <- function(lpr, ivt, dat,
   dat <- na.omit(dat)
 
   if(nrow(dat) < 1) {
-    log_prior(lpr, mu=mu, sig=sig, ler_mean=ler_mean, ler_sdev=ler_sdev)
+    res <- log_prior(lpr, mu=mu, sig=sig, ler_mean=ler_mean, ler_sdev=ler_sdev)
+    attr(res, "soln") <- NULL
   } else {
     log_like <- log_likelihood(lpr, ivt, dat)
     res <- log_prior(lpr, mu, sig, ler_mean, ler_sdev) + log_like
     attr(res, "soln") <- attributes(log_like)$soln
-    res
   }
+
+  return(res)
 }

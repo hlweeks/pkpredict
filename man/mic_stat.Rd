@@ -11,11 +11,12 @@ mic_stat(
   pars = c(getOption("pkpredict.pip.default.prior")$log_pk_mean,
     getOption("pkpredict.pip.default.prior")$log_err_mean),
   cod = 12,
-  timeint = c(0, max(sapply(ivt, function(x) x$end)) + cod),
+  timeint = NULL,
   conf.level = 0.95,
   mcmc = FALSE,
   nreps = 5000,
   nburnin = 2000,
+  nthin = 10,
   seed = NULL,
   shiny = FALSE,
   ...
@@ -23,7 +24,8 @@ mic_stat(
 }
 \arguments{
 \item{ivt}{List with containing start of infusion times (h), end of infusion times (h),
-and rate of infusion (g/h) at each dose}
+and rate of infusion (g/h) at each dose. First infusion within \code{ivt} must be a true initial infusion,
+i.e. concentration of the drug in the patient's system must be 0 prior to that time.}
 
 \item{th}{Threshold value for effective treatment - check units}
 
@@ -44,6 +46,8 @@ the statistic is computed. By default covers the full dosing period + \code{cod}
 
 \item{nburnin}{mcmc burn in iterations}
 
+\item{nthin}{mcmc thinning interval}
+
 \item{seed}{seed for replication}
 
 \item{shiny}{is shiny being used}
@@ -52,8 +56,8 @@ the statistic is computed. By default covers the full dosing period + \code{cod}
 variance-covariance matrix and error prior mean and standard deviation, respectively)}
 }
 \value{
-Fraction of time spent above the specified threshold from time of first dose through
-\code{cod} hours after end of the last dose
+Fraction of time spent above the specified threshold within a certain time interval (by default: time of first dose through
+\code{cod} hours after end of the last dose).
 }
 \description{
 Compute an estimate of pharmacodynamic target attainment, typically defined
